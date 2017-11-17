@@ -2,6 +2,9 @@
 using Ninject.Web.Common;
 using SecretSantaData;
 using SecretSantaData.Contracts;
+using SecretSantaServices;
+using SecretSantaServices.Contracts;
+using SecretSantaServices.Providers;
 
 namespace SecretSantaWeb
 {
@@ -12,6 +15,9 @@ namespace SecretSantaWeb
             this.Bind<SecretSantaDbContext>().ToSelf();
             this.Bind(typeof(IRepository<>)).To(typeof(GenericRepository<>)).InRequestScope();
             this.Bind<IUnitOfWork>().To<UnitOfWork>().InRequestScope();
+            this.Bind<IHttpContextProvider>().To<HttpContextProvider>().InSingletonScope();
+            this.Bind<IGroupsService>().To<GroupsService>().InRequestScope();
+            this.Bind<IAuthenticationService>().To<AuthenticationService>().InRequestScope();
         }
     }
 }
