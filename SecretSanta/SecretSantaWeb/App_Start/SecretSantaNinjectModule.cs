@@ -12,7 +12,7 @@ namespace SecretSantaWeb
     {
         public override void Load()
         {
-            this.Bind<SecretSantaDbContext>().ToSelf();
+            this.Bind<SecretSantaDbContext>().ToSelf().InRequestScope();
             this.Bind(typeof(IRepository<>)).To(typeof(GenericRepository<>)).InRequestScope();
             this.Bind<IUnitOfWork>().To<UnitOfWork>().InRequestScope();
             this.Bind<IHttpContextProvider>().To<HttpContextProvider>().InSingletonScope();

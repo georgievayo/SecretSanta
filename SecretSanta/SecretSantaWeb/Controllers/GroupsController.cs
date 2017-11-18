@@ -7,7 +7,6 @@ using SecretSantaWeb.Models;
 
 namespace SecretSantaWeb.Controllers
 {
-    [Authorize]
     [RoutePrefix("groups")]
     public class GroupsController : ApiController
     {
