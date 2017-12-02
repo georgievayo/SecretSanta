@@ -138,6 +138,27 @@ namespace SecretSanta.API.Controllers
             return Ok(users);
         }
 
+        [HttpGet]
+        [Route("{username}/groups")]
+        public IHttpActionResult GetUserGroups(string username, [FromUri]PagingCriteria criteria)
+        {
+            if (username == null)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                var groups = this._usersService.GetUserGroups(username, criteria.Skip, criteria.Take);
+                return Ok(groups);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return NotFound();
+            }
+
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing && _userManager != null)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using SecretSanta.Data.Interfaces;
 using SecretSanta.Models;
@@ -45,6 +46,17 @@ namespace SecretSanta.Services
                     .Take(take);
             }
             
+        }
+
+        public ICollection<Group> GetUserGroups(string username, int skip, int take)
+        {
+            var user = this.GetUserByUsername(username);
+            if (user == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            return user.Groups.Skip(skip).Take(take).ToList();
         }
     }
 }

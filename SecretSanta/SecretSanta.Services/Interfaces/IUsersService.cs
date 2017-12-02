@@ -8,5 +8,7 @@ namespace SecretSanta.Services.Interfaces
         User GetUserByUsername(string username);
 
         IEnumerable<User> GetUsers(int skip, int take, string order, string search);
+
+        ICollection<Group> GetUserGroups(string username, int skip, int take);
     }
 }
