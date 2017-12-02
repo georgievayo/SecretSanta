@@ -1,4 +1,5 @@
-﻿using SecretSanta.Models;
+﻿using System.Collections.Generic;
+using SecretSanta.Models;
 
 namespace SecretSanta.Services.Interfaces
 {
@@ -6,6 +7,6 @@ namespace SecretSanta.Services.Interfaces
     {
         User GetUserByUsername(string username);
 
-        User FindUser(string userName, string password);
+        IEnumerable<User> GetUsers(int skip, int take, string order, string search);
     }
 }

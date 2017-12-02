@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using SecretSanta.Data.Interfaces;
 using SecretSanta.Models;
 using SecretSanta.Services.Interfaces;
@@ -23,10 +24,27 @@ namespace SecretSanta.Services
                 .FirstOrDefault(u => u.UserName == username);
         }
 
-        public User FindUser(string userName, string password)
+        public IEnumerable<User> GetUsers(int skip, int take, string order, string search)
         {
-            var user = _repository.All.FirstOrDefault(u => u.UserName == userName && u.PasswordHash == password);
-            return user;
+            if (order.ToLower() == "asc")
+            {
+                return this._repository
+                    .All
+                    .Where(u => u.UserName == search || u.DisplayName == search)
+                    .OrderBy(u => u.DisplayName)
+                    .Skip(skip)
+                    .Take(take);
+            }
+            else
+            {
+                return this._repository
+                    .All
+                    .Where(u => u.UserName == search || u.DisplayName == search)
+                    .OrderByDescending(u => u.DisplayName)
+                    .Skip(skip)
+                    .Take(take);
+            }
+            
         }
     }
 }

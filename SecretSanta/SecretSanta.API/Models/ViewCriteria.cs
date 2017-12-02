@@ -7,9 +7,9 @@ namespace SecretSanta.API.Models
 {
     public class ViewCriteria
     {
-        public string Skip { get; set; }
+        public int Skip { get; set; }
 
-        public string Take { get; set; }
+        public int Take { get; set; }
 
         public string Order { get; set; }
 

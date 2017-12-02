@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -56,7 +57,7 @@ namespace SecretSanta.API.Controllers
             Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
             return Ok();
         }
-      
+
         [AllowAnonymous]
         [HttpPost]
         [Route("")]
@@ -120,7 +121,24 @@ namespace SecretSanta.API.Controllers
             return Ok(model);
         }
 
-      protected override void Dispose(bool disposing)
+        [HttpGet]
+        [Authorize]
+        [Route("")]
+        public IHttpActionResult GetAllUsers([FromUri]ViewCriteria criteria)
+        {
+            if (criteria.Order.ToLower() != "asc" && criteria.Order.ToLower() != "desc")
+            {
+                return BadRequest();
+            }
+
+            var users = this._usersService
+                .GetUsers(criteria.Skip, criteria.Take, criteria.Order, criteria.Search)
+                .ToList();
+
+            return Ok(users);
+        }
+
+        protected override void Dispose(bool disposing)
         {
             if (disposing && _userManager != null)
             {
