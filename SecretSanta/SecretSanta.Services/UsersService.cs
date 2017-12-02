@@ -58,5 +58,11 @@ namespace SecretSanta.Services
 
             return user.Groups.Skip(skip).Take(take).ToList();
         }
+
+        public void AddRequest(Request requestToSend, User user)
+        {
+            user.Requests.Add(requestToSend);
+            this._unitOfWork.SaveChanges();
+        }
     }
 }

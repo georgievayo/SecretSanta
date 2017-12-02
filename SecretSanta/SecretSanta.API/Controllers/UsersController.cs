@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -19,14 +20,16 @@ namespace SecretSanta.API.Controllers
 {
 
     [RoutePrefix("api/users")]
-    public class AccountController : ApiController
+    public class UsersController : ApiController
     {
         private ApplicationUserManager _userManager;
         private readonly IUsersService _usersService;
+        private readonly IGroupsService _groupsService;
 
-        public AccountController(IUsersService usersService)
+        public UsersController(IUsersService usersService, IGroupsService groupsService)
         {
             this._usersService = usersService;
+            this._groupsService = groupsService;
         }
 
         //public AccountController(ApplicationUserManager userManager,
@@ -157,6 +160,90 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
+        }
+
+        [HttpGet]
+        [Route("{username}/requests")]
+        public IHttpActionResult GetAllRequests(string username, [FromUri] ViewCriteria criteria)
+        {
+            if (criteria.Order.ToLower() != "asc" && criteria.Order.ToLower() != "desc")
+            {
+                return BadRequest();
+            }
+
+            var user = this._usersService.GetUserByUsername(username);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var currentUserId = RequestContext.Principal.Identity.GetUserId();
+            if (currentUserId != user.Id)
+            {
+                return Content(HttpStatusCode.Forbidden, "You cannot see other's requests.");
+            }
+
+            if (criteria.Order.ToLower() == "asc")
+            {
+                var requests = user.Requests
+                    .OrderBy(r => r.ReceivedAt)
+                    .Skip(criteria.Skip)
+                    .Take(criteria.Take)
+                    .ToList();
+
+                return Ok(requests);
+            }
+            else
+            {
+                var requests = user.Requests
+                    .OrderByDescending(r => r.ReceivedAt)
+                    .Skip(criteria.Skip)
+                    .Take(criteria.Take)
+                    .ToList();
+
+                return Ok(requests);
+            }
+            // Should be mapped to view model
+        }
+
+        [HttpPost]
+        [Route("{username}/requests")]
+        public IHttpActionResult SendRequest(string username, [FromBody] RequestViewModel request)
+        {
+            if (username == null || request.GroupName == null || request.OwnerName == null)
+            {
+                return BadRequest();
+            }
+
+            var user = this._usersService.GetUserByUsername(username);
+            var group = this._groupsService.GetGroupByName(request.GroupName);
+            if (user == null || group.Name == null)
+            {
+                return NotFound();
+            }
+
+            var currentUserUsername = RequestContext.Principal.Identity.Name;
+            if (currentUserUsername != request.OwnerName)
+            {
+                return Content(HttpStatusCode.Forbidden, "You cannot send requests for this group.");
+            }
+
+            var foundRequst = user.Requests.First(r => r.ReceivedAt == request.Date && r.Group.Name == request.GroupName);
+            if (foundRequst != null)
+            {
+                return Content(HttpStatusCode.Conflict, "You have already sent request to this user.");
+            }
+
+            var requestToSend = new Request()
+            {
+                ReceivedAt = request.Date,
+                To = user,
+                Id = Guid.NewGuid(),
+                Group = group
+            };
+
+            this._usersService.AddRequest(requestToSend, user);
+            return Created("requests", requestToSend);
         }
 
         protected override void Dispose(bool disposing)

@@ -9,6 +9,7 @@ using SecretSanta.Services.Interfaces;
 
 namespace SecretSanta.API.Controllers
 {
+    [Authorize]
     [RoutePrefix("api/groups")]
     public class GroupsController : ApiController
     {

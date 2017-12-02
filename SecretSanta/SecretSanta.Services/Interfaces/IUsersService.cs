@@ -10,5 +10,7 @@ namespace SecretSanta.Services.Interfaces
         IEnumerable<User> GetUsers(int skip, int take, string order, string search);
 
         ICollection<Group> GetUserGroups(string username, int skip, int take);
+
+        void AddRequest(Request requestToSend, User user);
     }
 }
