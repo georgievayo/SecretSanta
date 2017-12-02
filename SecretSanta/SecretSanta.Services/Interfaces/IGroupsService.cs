@@ -11,6 +11,6 @@ namespace SecretSanta.Services.Interfaces
 
         void RemoveUserFromGroup(string groupName, User user);
 
-        ICollection<User> GetAllParticipantsOfGroup(string name);
+        Group GetGroupByName(string name);
     }
 }

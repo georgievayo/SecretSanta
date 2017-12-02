@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Web.Http;
+using System.Web.Http.Results;
 using Microsoft.AspNet.Identity;
 using SecretSanta.API.Models;
 using SecretSanta.Models;
@@ -40,30 +42,30 @@ namespace SecretSanta.API.Controllers
         [Authorize]
         [HttpGet]
         [Route("{groupName}/participants")]
-        public IHttpActionResult GetParticipants(string groupName, [FromUri]ViewCriteria criteria)
+        public IHttpActionResult GetParticipants(string groupName)
         {
-            if (criteria.Order != "ASC" && criteria.Order != "DSC")
-            {
-                return BadRequest();
-            }
+            var currentUserId = RequestContext.Principal.Identity.GetUserId();
+            var group = this._groupsService.GetGroupByName(groupName);
 
-            IEnumerable<ParticipantViewModel> participants = null;
-            try
-            {
-                participants = this._groupsService.GetAllParticipantsOfGroup(groupName)
-                    .Select(p => new ParticipantViewModel()
-                        {
-                            Username = p.UserName,
-                            DisplayName = p.DisplayName,
-                            Email = p.Email,
-                            PhotoUrl = p.PhotoUrl
-                        }
-                    );
-            }
-            catch (ArgumentNullException ex)
+            if (group == null)
             {
                 return NotFound();
             }
+
+            if (group.OwnerId != currentUserId)
+            {
+                return Content(HttpStatusCode.Forbidden, new List<ParticipantViewModel>());
+            }
+
+            var participants = group.Users
+                .Select(p => new ParticipantViewModel()
+                {
+                    Username = p.UserName,
+                    DisplayName = p.DisplayName,
+                    Email = p.Email,
+                    PhotoUrl = p.PhotoUrl
+                }
+                );
 
             return Ok(participants);
         }

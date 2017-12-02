@@ -59,19 +59,12 @@ namespace SecretSanta.Services
             this._unitOfWork.SaveChanges();
         }
 
-        public ICollection<User> GetAllParticipantsOfGroup(string name)
+        public Group GetGroupByName(string name)
         {
-            var group = this._repository
+            return this._repository
                 .All
                 .Include(g => g.Users)
                 .FirstOrDefault(g => g.Name == name);
-
-            if (group == null)
-            {
-                throw new ArgumentNullException(nameof(group));
-            }
-
-            return group.Users;
         }
     }
 }
