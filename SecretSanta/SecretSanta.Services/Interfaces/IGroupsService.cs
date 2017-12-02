@@ -9,7 +9,7 @@ namespace SecretSanta.Services.Interfaces
 
         void AddUserToGroup(string groupName, User user);
 
-        void RemoveUserFromGroup(string groupName, User user);
+        void RemoveUserFromGroup(Group group, User user);
 
         Group GetGroupByName(string name);
     }

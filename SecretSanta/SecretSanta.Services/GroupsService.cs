@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using SecretSanta.Models;
@@ -47,14 +46,8 @@ namespace SecretSanta.Services
             this._unitOfWork.SaveChanges();
         }
 
-        public void RemoveUserFromGroup(string groupName, User user)
+        public void RemoveUserFromGroup(Group group, User user)
         {
-            var group = this._repository.All.FirstOrDefault(g => g.Name == groupName);
-            if (group == null)
-            {
-                throw new ArgumentNullException(nameof(group));
-            }
-
             group.Users.Remove(user);
             this._unitOfWork.SaveChanges();
         }

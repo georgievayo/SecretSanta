@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Http;
-using System.Web.Http.Results;
 using Microsoft.AspNet.Identity;
 using SecretSanta.API.Models;
-using SecretSanta.Models;
 using SecretSanta.Services.Interfaces;
 
 namespace SecretSanta.API.Controllers
@@ -29,14 +27,21 @@ namespace SecretSanta.API.Controllers
         public IHttpActionResult CreateGroup([FromBody] string groupName)
         {
             var currentUserId = RequestContext.Principal.Identity.GetUserId();
-            var group = this._groupsService.CreateGroup(groupName, currentUserId);
-
-            if (group == null)
+            try
             {
-                return BadRequest();
-            }
+                var group = this._groupsService.CreateGroup(groupName, currentUserId);
 
-            return Created("~api/groups", group);
+                if (group == null)
+                {
+                    return BadRequest();
+                }
+
+                return Created("~api/groups", group);
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.Conflict, "The name should be unique!");
+            }
         }
 
         [Authorize]
@@ -44,6 +49,11 @@ namespace SecretSanta.API.Controllers
         [Route("{groupName}/participants")]
         public IHttpActionResult GetParticipants(string groupName)
         {
+            if (groupName == null)
+            {
+                return BadRequest();
+            }
+
             var currentUserId = RequestContext.Principal.Identity.GetUserId();
             var group = this._groupsService.GetGroupByName(groupName);
 
@@ -74,28 +84,50 @@ namespace SecretSanta.API.Controllers
         [Route("{groupName}/participants")]
         public IHttpActionResult PostParticipant([FromUri] string groupName, [FromBody] string username)
         {
+            if (groupName == null || username == null)
+            {
+                return BadRequest();
+            }
+
             var user = this._usersService.GetUserByUsername(username);
             if (user == null)
             {
                 return NotFound();
             }
-
+            // Should return 403 if user has not such request
             this._groupsService.AddUserToGroup(groupName, user);
-            return Ok();
+            return Created("participants", user);
         }
 
         [HttpDelete]
-        [Route("{groupName}/participants")]
-        public IHttpActionResult DeleteParticipant([FromUri] string groupName, [FromBody] string username)
+        [Route("{groupName}/participants/{username}")]
+        public IHttpActionResult DeleteParticipant(string groupName, string username)
         {
+            if (groupName == null || username == null)
+            {
+                return BadRequest();
+            }
+
             var user = this._usersService.GetUserByUsername(username);
             if (user == null)
             {
                 return NotFound();
             }
+            var group = this._groupsService.GetGroupByName(groupName);
 
-            this._groupsService.RemoveUserFromGroup(groupName, user);
-            return Ok();
+            if (group == null)
+            {
+                return NotFound();
+            }
+
+            var currentUserId = RequestContext.Principal.Identity.GetUserId();
+            if (group.OwnerId != currentUserId)
+            {
+                return Content(HttpStatusCode.Forbidden, "Not an owner");
+            }
+
+            this._groupsService.RemoveUserFromGroup(group, user);
+            return Content(HttpStatusCode.NoContent, "Deleted");
         }
     }
 }
