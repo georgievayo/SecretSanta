@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using Microsoft.AspNet.Identity;
@@ -23,29 +24,48 @@ namespace SecretSanta.API.Controllers
         [Authorize]
         [HttpPost]
         [Route("")]
-        public Group CreateGroup([FromBody] string groupName)
+        public IHttpActionResult CreateGroup([FromBody] string groupName)
         {
             var currentUserId = RequestContext.Principal.Identity.GetUserId();
             var group = this._groupsService.CreateGroup(groupName, currentUserId);
 
-            return group;
+            if (group == null)
+            {
+                return BadRequest();
+            }
+
+            return Created("~api/groups", group);
         }
 
         [Authorize]
         [HttpGet]
         [Route("{groupName}/participants")]
-        public IEnumerable<ParticipantViewModel> GetParticipants([FromUri]string groupName)
+        public IHttpActionResult GetParticipants(string groupName, [FromUri]ViewCriteria criteria)
         {
-            var participants = this._groupsService.GetAllParticipantsOfGroup(groupName).Select(p => new ParticipantViewModel()
-                {
-                    Username = p.UserName,
-                    DisplayName = p.DisplayName,
-                    Email = p.Email,
-                    PhotoUrl = p.PhotoUrl
-                }
-            );
+            if (criteria.Order != "ASC" && criteria.Order != "DSC")
+            {
+                return BadRequest();
+            }
 
-            return participants;
+            IEnumerable<ParticipantViewModel> participants = null;
+            try
+            {
+                participants = this._groupsService.GetAllParticipantsOfGroup(groupName)
+                    .Select(p => new ParticipantViewModel()
+                        {
+                            Username = p.UserName,
+                            DisplayName = p.DisplayName,
+                            Email = p.Email,
+                            PhotoUrl = p.PhotoUrl
+                        }
+                    );
+            }
+            catch (ArgumentNullException ex)
+            {
+                return NotFound();
+            }
+
+            return Ok(participants);
         }
 
         [HttpPost]
@@ -53,6 +73,11 @@ namespace SecretSanta.API.Controllers
         public IHttpActionResult PostParticipant([FromUri] string groupName, [FromBody] string username)
         {
             var user = this._usersService.GetUserByUsername(username);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
             this._groupsService.AddUserToGroup(groupName, user);
             return Ok();
         }
@@ -62,6 +87,11 @@ namespace SecretSanta.API.Controllers
         public IHttpActionResult DeleteParticipant([FromUri] string groupName, [FromBody] string username)
         {
             var user = this._usersService.GetUserByUsername(username);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
             this._groupsService.RemoveUserFromGroup(groupName, user);
             return Ok();
         }

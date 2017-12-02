@@ -12,6 +12,7 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using SecretSanta.API.Models;
 using SecretSanta.Models;
+using SecretSanta.Services.Interfaces;
 
 namespace SecretSanta.API.Controllers
 {
@@ -20,17 +21,19 @@ namespace SecretSanta.API.Controllers
     public class AccountController : ApiController
     {
         private ApplicationUserManager _userManager;
+        private readonly IUsersService _usersService;
 
-        public AccountController()
+        public AccountController(IUsersService usersService)
         {
+            this._usersService = usersService;
         }
 
-        public AccountController(ApplicationUserManager userManager,
-            ISecureDataFormat<AuthenticationTicket> accessTokenFormat)
-        {
-            UserManager = userManager;
-            AccessTokenFormat = accessTokenFormat;
-        }
+        //public AccountController(ApplicationUserManager userManager,
+        //    ISecureDataFormat<AuthenticationTicket> accessTokenFormat)
+        //{
+        //    UserManager = userManager;
+        //    AccessTokenFormat = accessTokenFormat;
+        //}
 
         public ApplicationUserManager UserManager
         {
@@ -44,7 +47,7 @@ namespace SecretSanta.API.Controllers
             }
         }
 
-        public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
+        //public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
 
         // POST api/Account/Logout
         [Route("Logout")]
@@ -57,14 +60,24 @@ namespace SecretSanta.API.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("")]
-        public async Task<IHttpActionResult> Register(RegisterBindingModel model)
+        public async Task<IHttpActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = new User() { UserName = model.Username, Email = model.Email, PasswordHash = model.Password };
+            var user = new User()
+            {
+                UserName = model.Username,
+                Email = model.Email,
+                DisplayName = model.DisplayName,
+                Age = model.Age,
+                PhoneNumber = model.PhoneNumber,
+                PhotoUrl = model.PhotoUrl,
+                Address = model.Address,
+                Interests = model.Interests,
+            };
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
 
@@ -73,7 +86,38 @@ namespace SecretSanta.API.Controllers
                 return GetErrorResult(result);
             }
 
-            return Ok();
+            return Created("~api/users", user);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("{username}")]
+        public IHttpActionResult GetProfile(string username)
+        {
+            if (username == null)
+            {
+                return BadRequest();
+            }
+
+            var user = this._usersService.GetUserByUsername(username);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new UserProfileViewModel()
+            {
+                Username = user.UserName,
+                DisplayName = user.DisplayName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                Age = user.Age,
+                Interests = user.Interests,
+                PhotoUrl = user.PhotoUrl
+            };
+
+            return Ok(model);
         }
 
       protected override void Dispose(bool disposing)

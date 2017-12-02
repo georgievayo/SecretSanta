@@ -13,7 +13,7 @@ namespace SecretSanta.Data.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201712020923358_Initial"; }
+            get { return "201712021554085_Initial"; }
         }
         
         string IMigrationMetadata.Source

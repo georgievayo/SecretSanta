@@ -8,6 +8,12 @@ namespace SecretSanta.Models
 {
     public class User: IdentityUser, IUser
     {
+        public User()
+        {
+            this.Presents = new HashSet<Present>();
+            this.Requests = new HashSet<Request>();
+            this.Groups = new HashSet<Group>();
+        }
         public string DisplayName { get; set; }
 
         public string PhotoUrl { get; set; }
