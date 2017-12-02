@@ -64,5 +64,11 @@ namespace SecretSanta.Services
             user.Requests.Add(requestToSend);
             this._unitOfWork.SaveChanges();
         }
+
+        public void DeleteRequest(Request request, User user)
+        {
+            user.Requests.Remove(request);
+            this._unitOfWork.SaveChanges();
+        }
     }
 }

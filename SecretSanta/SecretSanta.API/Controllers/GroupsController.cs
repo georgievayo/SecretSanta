@@ -22,7 +22,6 @@ namespace SecretSanta.API.Controllers
             this._usersService = usersService;
         }
 
-        [Authorize]
         [HttpPost]
         [Route("")]
         public IHttpActionResult CreateGroup([FromBody] string groupName)
@@ -45,7 +44,6 @@ namespace SecretSanta.API.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet]
         [Route("{groupName}/participants")]
         public IHttpActionResult GetParticipants(string groupName)

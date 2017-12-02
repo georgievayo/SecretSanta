@@ -12,5 +12,7 @@ namespace SecretSanta.Services.Interfaces
         ICollection<Group> GetUserGroups(string username, int skip, int take);
 
         void AddRequest(Request requestToSend, User user);
+
+        void DeleteRequest(Request request, User user);
     }
 }

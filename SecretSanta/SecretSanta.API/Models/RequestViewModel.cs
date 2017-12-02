@@ -9,5 +9,7 @@ namespace SecretSanta.API.Models
         public DateTime Date { get; set; }
 
         public string OwnerName { get; set; }
+
+        public Guid? Id { get; set; }
     }
 }

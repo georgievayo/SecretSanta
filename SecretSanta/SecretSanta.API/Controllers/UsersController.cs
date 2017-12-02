@@ -53,8 +53,9 @@ namespace SecretSanta.API.Controllers
 
         //public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
 
-        // POST api/Account/Logout
-        [Route("Logout")]
+        [HttpDelete]
+        [Authorize]
+        [Route("logins")]
         public IHttpActionResult Logout()
         {
             Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
@@ -142,6 +143,7 @@ namespace SecretSanta.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("{username}/groups")]
         public IHttpActionResult GetUserGroups(string username, [FromUri]PagingCriteria criteria)
         {
@@ -153,6 +155,7 @@ namespace SecretSanta.API.Controllers
             try
             {
                 var groups = this._usersService.GetUserGroups(username, criteria.Skip, criteria.Take);
+                // should be mapped
                 return Ok(groups);
             }
             catch (ArgumentNullException ex)
@@ -163,6 +166,7 @@ namespace SecretSanta.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("{username}/requests")]
         public IHttpActionResult GetAllRequests(string username, [FromUri] ViewCriteria criteria)
         {
@@ -189,6 +193,13 @@ namespace SecretSanta.API.Controllers
                     .OrderBy(r => r.ReceivedAt)
                     .Skip(criteria.Skip)
                     .Take(criteria.Take)
+                    .Select(r => new RequestViewModel()
+                    {
+                        Date = r.ReceivedAt,
+                        GroupName = r.Group.Name,
+                        OwnerName = r.Group.Owner.DisplayName,
+                        Id = r.Id
+                    })
                     .ToList();
 
                 return Ok(requests);
@@ -199,14 +210,21 @@ namespace SecretSanta.API.Controllers
                     .OrderByDescending(r => r.ReceivedAt)
                     .Skip(criteria.Skip)
                     .Take(criteria.Take)
+                    .Select(r => new RequestViewModel()
+                    {
+                        Date = r.ReceivedAt,
+                        GroupName = r.Group.Name,
+                        OwnerName = r.Group.Owner.DisplayName,
+                        Id = r.Id
+                    })
                     .ToList();
 
                 return Ok(requests);
             }
-            // Should be mapped to view model
         }
 
         [HttpPost]
+        [Authorize]
         [Route("{username}/requests")]
         public IHttpActionResult SendRequest(string username, [FromBody] RequestViewModel request)
         {
@@ -244,6 +262,38 @@ namespace SecretSanta.API.Controllers
 
             this._usersService.AddRequest(requestToSend, user);
             return Created("requests", requestToSend);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("{username}/requests/{id}")]
+        public IHttpActionResult DeleteRequest(string username, string id)
+        {
+            if (username == null || id == null)
+            {
+                return BadRequest();
+            }
+
+            var user = this._usersService.GetUserByUsername(username);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var currentUserUsername = RequestContext.Principal.Identity.Name;
+            if (user.UserName != currentUserUsername)
+            {
+                return Content(HttpStatusCode.Forbidden, "You cannot delete this request.");
+            }
+
+            var request = user.Requests.First(r => r.Id == Guid.Parse(id));
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            this._usersService.DeleteRequest(request, user);
+            return Content(HttpStatusCode.NoContent, "Deleted");
         }
 
         protected override void Dispose(bool disposing)
