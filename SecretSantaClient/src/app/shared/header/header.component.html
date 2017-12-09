@@ -1,31 +1,26 @@
-<nav>
-  <div id="navigation">
-    <div>
-      <a class="navbar-brand" [routerLink]="[ '/home' ]">
-        Secret Santa
-      </a> 
-    </div>
-    <ul class="nav navbar-nav navbar-left">
-      <li routerLinkActive="active">
-        <a routerLink="/home">Home</a>
-      </li>
-      <li routerLinkActive="active">
-        <a routerLink="/users">All users</a>
-      </li>
-      <li routerLinkActive="active">
-        <a [routerLink]="[ 'users', username, 'requests' ]">My requests</a>
-      </li>
-    </ul>
-    <ul class="nav navbar-nav navbar-right">
-      <li routerLinkActive="active" *ngIf="!currentUser">
-        <a routerLink="/signup"><span class="glyphicon glyphicon-log-in"></span> Sign up </a>
-      </li>
-      <li routerLinkActive="active" *ngIf="currentUser">
-        <a routerLink="[ 'users', username ]">Welcome, {{username}}</a>
-      </li>
-      <li routerLinkActive="active" *ngIf="(user | async)?.uid">
-        <a class="tempStyling" id="logout-btn" (click)="logout()"><span class="glyphicon glyphicon-log-out"></span>Logout</a>
-      </li>
-    </ul>
-  </div>
-</nav>
+<div class="container">
+<div class="navbar">
+  <a class="menu" href="#"><i class="icon-align-justify"></i></a>
+  <a class="link" routerLink="/home">
+    <span class="active"><span class="valign"><span class="vertical">HOME</span></span></span>
+    <span class="hover"><span class="valign"><span class="vertical">HOME</span></span></span>
+  </a>
+  <a class="link" routerLink="/users">
+    <span class="active"><span class="valign"><span class="vertical">USERS</span></span></span>
+    <span class="hover"><span class="valign"><span class="vertical">USERS</span></span></span>
+  </a>
+  <a class="link" [routerLink]="[ 'users', username, 'requests' ]">
+    <span class="active"><span class="valign"><span class="vertical">REQUESTS</span></span></span>
+    <span class="hover"><span class="valign"><span class="vertical">REQUESTS</span></span></span>
+  </a>
+
+  <!-- <a class="link" [routerLink]="/signup">
+    <span class="active"><span class="valign"><span class="vertical">SIGNUP</span></span></span>
+    <span class="hover"><span class="valign"><span class="vertical">SIGNUP</span></span></span>
+  </a>
+  <a class="link" [routerLink]="[ 'users', username, 'requests' ]">
+    <span class="active"><span class="valign"><span class="vertical">PROFILE</span></span></span>
+    <span class="hover"><span class="valign"><span class="vertical">PROFILE</span></span></span>
+  </a> -->
+</div>
+</div>
