@@ -1,3 +1,4 @@
+import { CoreModule } from './core/core.module';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { GroupsModule } from './groups/groups.module';
@@ -24,6 +25,7 @@ import { FormsModule } from '@angular/forms';
   imports: [
     BrowserModule,
     SharedModule,
+    CoreModule,
     UsersModule,
     RequestsModule,
     GroupsModule,
