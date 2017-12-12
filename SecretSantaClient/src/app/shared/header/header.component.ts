@@ -1,5 +1,7 @@
+import { Subject } from 'rxjs/Subject';
 import { UsersService } from './../../core/users.service';
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-header',
@@ -8,7 +10,8 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HeaderComponent implements OnInit {
   hasLoggedUser: boolean;
-  constructor(private usersService: UsersService) { }
+  constructor(private usersService: UsersService) {
+  }
 
   ngOnInit() {
   }

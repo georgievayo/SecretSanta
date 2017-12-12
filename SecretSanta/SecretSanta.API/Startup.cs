@@ -18,15 +18,19 @@ namespace SecretSanta.API
         public void Configuration(IAppBuilder app)
         {
             var builder = new ContainerBuilder();
-            var config = GlobalConfiguration.Configuration;
+           
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
             builder.RegisterType<UsersService>().As<IUsersService>().InstancePerRequest();
             builder.RegisterType<GroupsService>().As<IGroupsService>().InstancePerRequest();
             builder.RegisterType<UnitOfWork>().As<IUnitOfWork>().InstancePerRequest();
             builder.RegisterType<SecretSantaDbContext>().AsSelf().InstancePerRequest();
             builder.RegisterGeneric(typeof(GenericRepository<>)).As(typeof(IRepository<>)).InstancePerRequest();
+
             var container = builder.Build();
+
+            var config = GlobalConfiguration.Configuration;
             config.DependencyResolver = new AutofacWebApiDependencyResolver(container);
+
             ConfigureAuth(app);
         }
     }
