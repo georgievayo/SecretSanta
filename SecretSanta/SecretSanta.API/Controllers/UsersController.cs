@@ -81,7 +81,6 @@ namespace SecretSanta.API.Controllers
                 DisplayName = model.DisplayName,
                 Age = model.Age,
                 PhoneNumber = model.PhoneNumber,
-                PhotoUrl = model.PhotoUrl,
                 Address = model.Address,
                 Interests = model.Interests,
             };

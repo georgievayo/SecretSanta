@@ -5,9 +5,11 @@ import { Subject } from 'rxjs/Subject';
 
 @Injectable()
 export class UsersService {
-    hasLoggedUser: Subject<boolean> = new Subject<boolean>();
-
     constructor(private http: Http) { }
+
+    signup(user) {
+        this.http.post('http://localhost:2835/api/users', user).subscribe(res => console.log(res));
+    }
 
     login(username: string, password: string) {
         // should be passHash
@@ -23,7 +25,6 @@ export class UsersService {
                 if (res.ok) {
                     const authToken = res.json();
                     localStorage.setItem('currentUser', JSON.stringify(authToken));
-                    this.hasLoggedUser.next(true);
                 }
             });
     }
@@ -31,12 +32,8 @@ export class UsersService {
     logout() {
         const user = JSON.parse(localStorage.getItem('currentUser'));
         localStorage.removeItem('currentUser');
-        this.hasLoggedUser.next(false);
     }
 
-    hasUser() {
-        return this.hasLoggedUser.asObservable();
-    }
     getUsers(skip, take, order) {
         const options = this.getHeaders();
         return this.http.get(`http://localhost:2835/api/users?skip=${skip}&take=${take}&order=${order}`, options)

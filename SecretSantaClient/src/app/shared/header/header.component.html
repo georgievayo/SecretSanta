@@ -24,5 +24,9 @@
       <span class="active"><span class="valign"><span class="vertical">Profile</span></span></span>
       <span class="hover"><span class="valign"><span class="vertical">PROFILE</span></span></span>
     </a>
+    <a class="link" *ngIf="hasLoggedUser" (click)="logout()">
+      <span class="active"><span class="valign"><span class="vertical">Logout</span></span></span>
+      <span class="hover"><span class="valign"><span class="vertical">LOGOUT</span></span></span>
+    </a>
   </div>
 </div>
