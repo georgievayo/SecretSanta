@@ -29,23 +29,40 @@ namespace SecretSanta.Services
         {
             if (order.ToLower() == "asc")
             {
+                if (string.IsNullOrEmpty(search))
+                {
+                    return this._repository
+                        .All
+                        .OrderBy(u => u.DisplayName)
+                        .Skip(skip)
+                        .Take(take);
+                }
                 return this._repository
                     .All
-                    .Where(u => u.UserName == search || u.DisplayName == search)
+                    .Where(u => u.UserName.Contains(search) || u.DisplayName.Contains(search))
                     .OrderBy(u => u.DisplayName)
                     .Skip(skip)
                     .Take(take);
             }
             else
             {
+                if (string.IsNullOrEmpty(search))
+                {
+                    return this._repository
+                        .All
+                        .OrderByDescending(u => u.DisplayName)
+                        .Skip(skip)
+                        .Take(take);
+                }
+
                 return this._repository
                     .All
-                    .Where(u => u.UserName == search || u.DisplayName == search)
+                    .Where(u => u.UserName.Contains(search) || u.DisplayName.Contains(search))
                     .OrderByDescending(u => u.DisplayName)
                     .Skip(skip)
                     .Take(take);
             }
-            
+
         }
 
         public ICollection<Group> GetUserGroups(string username, int skip, int take)

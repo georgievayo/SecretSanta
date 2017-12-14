@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptions, Response } from '@angular/http';
 import 'rxjs/Rx';
@@ -5,7 +6,7 @@ import { Subject } from 'rxjs/Subject';
 
 @Injectable()
 export class UsersService {
-    constructor(private http: Http) { }
+    constructor(private http: Http, private router: Router) { }
 
     signup(user) {
         this.http.post('http://localhost:2835/api/users', user).subscribe(res => console.log(res));
@@ -25,7 +26,9 @@ export class UsersService {
                 if (res.ok) {
                     const authToken = res.json();
                     localStorage.setItem('currentUser', JSON.stringify(authToken));
+                    this.router.navigateByUrl('/home');
                 }
+                // TODO else show toastr message
             });
     }
 
@@ -34,9 +37,9 @@ export class UsersService {
         localStorage.removeItem('currentUser');
     }
 
-    getUsers(skip, take, order) {
+    getUsers(skip, take, order, pattern) {
         const options = this.getHeaders();
-        return this.http.get(`http://localhost:2835/api/users?skip=${skip}&take=${take}&order=${order}`, options)
+        return this.http.get(`http://localhost:2835/api/users?skip=${skip}&take=${take}&order=${order}&search=${pattern}`, options)
             .map(res => res.json());
     }
 

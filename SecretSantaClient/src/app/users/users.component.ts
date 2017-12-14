@@ -1,3 +1,4 @@
+import { User } from './../models/user';
 import { UsersService } from './../core/users.service';
 import { Component, OnInit } from '@angular/core';
 
@@ -7,11 +8,23 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
-
+  users: User[];
+  order;
   constructor(private usersService: UsersService) { }
 
   ngOnInit() {
-    this.usersService.getUsers(0, 10, 'asc').subscribe(users => console.log(users));
+    this.order = 'asc';
+  }
+
+  addOrder(order) {
+    this.order = order;
+  }
+
+  search(skip, take, pattern) {
+    this.usersService.getUsers(skip, take, this.order, pattern)
+      .subscribe(users => {
+       this.users = users;
+      });
   }
 
 }
