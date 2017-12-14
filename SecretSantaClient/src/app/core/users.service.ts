@@ -43,6 +43,12 @@ export class UsersService {
             .map(res => res.json());
     }
 
+    getUserProfile(username) {
+        const options = this.getHeaders();
+        return this.http.get(`http://localhost:2835/api/users/${username}`, options)
+            .map(res => res.json());
+    }
+
     private getHeaders() {
         const headers = new Headers();
         headers.append('Content-Type', 'application/json');
