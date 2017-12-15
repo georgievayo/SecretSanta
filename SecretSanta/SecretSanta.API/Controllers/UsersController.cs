@@ -27,19 +27,14 @@ namespace SecretSanta.API.Controllers
         private ApplicationUserManager _userManager;
         private readonly IUsersService _usersService;
         private readonly IGroupsService _groupsService;
+        private readonly IRequestsService _requestsService;
 
-        public UsersController(IUsersService usersService, IGroupsService groupsService)
+        public UsersController(IUsersService usersService, IGroupsService groupsService, IRequestsService requestsService)
         {
             this._usersService = usersService;
             this._groupsService = groupsService;
+            this._requestsService = requestsService;
         }
-
-        //public AccountController(ApplicationUserManager userManager,
-        //    ISecureDataFormat<AuthenticationTicket> accessTokenFormat)
-        //{
-        //    UserManager = userManager;
-        //    AccessTokenFormat = accessTokenFormat;
-        //}
 
         public ApplicationUserManager UserManager
         {
@@ -52,8 +47,6 @@ namespace SecretSanta.API.Controllers
                 _userManager = value;
             }
         }
-
-        //public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
 
         [HttpDelete]
         [Authorize]
@@ -188,39 +181,32 @@ namespace SecretSanta.API.Controllers
                 return Content(HttpStatusCode.Forbidden, "You cannot see other's requests.");
             }
 
+            var requests = this._requestsService.GetUserRequests(currentUserId)
+                .Skip(criteria.Skip)
+                .Take(criteria.Take)
+                .Select(r => new RequestViewModel()
+                {
+                    Date = r.ReceivedAt,
+                    GroupName = r.Group.Name,
+                    OwnerName = r.Group.Owner.DisplayName,
+                    Id = r.Id
+                });
+
             if (criteria.Order.ToLower() == "asc")
             {
-                var requests = user.Requests
-                    .OrderBy(r => r.ReceivedAt)
-                    .Skip(criteria.Skip)
-                    .Take(criteria.Take)
-                    .Select(r => new RequestViewModel()
-                    {
-                        Date = r.ReceivedAt,
-                        GroupName = r.Group.Name,
-                        OwnerName = r.Group.Owner.DisplayName,
-                        Id = r.Id
-                    })
+                var ordered = requests
+                    .OrderBy(r => r.Date)
                     .ToList();
 
-                return Ok(requests);
+                return Ok(ordered);
             }
             else
             {
-                var requests = user.Requests
-                    .OrderByDescending(r => r.ReceivedAt)
-                    .Skip(criteria.Skip)
-                    .Take(criteria.Take)
-                    .Select(r => new RequestViewModel()
-                    {
-                        Date = r.ReceivedAt,
-                        GroupName = r.Group.Name,
-                        OwnerName = r.Group.Owner.DisplayName,
-                        Id = r.Id
-                    })
+                var ordered = requests
+                    .OrderByDescending(r => r.Date)
                     .ToList();
 
-                return Ok(requests);
+                return Ok(ordered);
             }
         }
 
@@ -293,7 +279,7 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            this._usersService.DeleteRequest(request, user);
+            this._requestsService.DeleteRequest(request);
             return Content(HttpStatusCode.NoContent, "Deleted");
         }
 

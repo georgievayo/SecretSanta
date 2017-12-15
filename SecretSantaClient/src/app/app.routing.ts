@@ -1,3 +1,4 @@
+import { CreateGroupComponent } from './groups/create-group/create-group.component';
 import { LoginComponent } from './login/login.component';
 import { GroupComponent } from './groups/group/group.component';
 import { SignupComponent } from './signup/signup.component';
@@ -13,6 +14,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'home', component: HomeComponent },
   { path: 'users', component: UsersComponent },
+  { path: 'groups/create', component: CreateGroupComponent },
   { path: 'groups/:name', component: GroupComponent },
   { path: 'users/:username', component: ProfileComponent },
   { path: 'users/:username/requests', component: RequestsComponent }

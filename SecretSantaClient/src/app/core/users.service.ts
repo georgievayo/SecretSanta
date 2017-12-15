@@ -60,5 +60,5 @@ export class UsersService {
         }
 
         return new RequestOptions({ headers: headers });
-}
+    }
 }

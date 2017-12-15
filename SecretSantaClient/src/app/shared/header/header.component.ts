@@ -10,6 +10,7 @@ import { Observable } from 'rxjs/Observable';
 })
 export class HeaderComponent implements OnInit, DoCheck {
   hasLoggedUser: boolean;
+  username: string;
   constructor(private usersService: UsersService) {
   }
 
@@ -17,7 +18,9 @@ export class HeaderComponent implements OnInit, DoCheck {
   }
 
   ngDoCheck() {
-    this.hasLoggedUser = localStorage.getItem('currentUser') !== null;
+    const currentUser = localStorage.getItem('currentUser');
+    this.hasLoggedUser = currentUser !== null;
+    this.username = JSON.parse(currentUser).userName;
   }
 
   logout() {

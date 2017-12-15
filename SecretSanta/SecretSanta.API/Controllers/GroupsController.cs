@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using Microsoft.AspNet.Identity;
 using SecretSanta.API.Models;
 using SecretSanta.Services.Interfaces;
@@ -11,6 +12,7 @@ namespace SecretSanta.API.Controllers
 {
     [Authorize]
     [RoutePrefix("api/groups")]
+    [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
     public class GroupsController : ApiController
     {
         private readonly IGroupsService _groupsService;

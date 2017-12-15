@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace SecretSanta.API.Models
+﻿namespace SecretSanta.API.Models
 {
     public class ViewCriteria
     {

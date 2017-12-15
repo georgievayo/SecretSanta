@@ -22,6 +22,7 @@ namespace SecretSanta.API
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
             builder.RegisterType<UsersService>().As<IUsersService>().InstancePerRequest();
             builder.RegisterType<GroupsService>().As<IGroupsService>().InstancePerRequest();
+            builder.RegisterType<RequestsService>().As<IRequestsService>().InstancePerRequest();
             builder.RegisterType<UnitOfWork>().As<IUnitOfWork>().InstancePerRequest();
             builder.RegisterType<SecretSantaDbContext>().AsSelf().InstancePerRequest();
             builder.RegisterGeneric(typeof(GenericRepository<>)).As(typeof(IRepository<>)).InstancePerRequest();

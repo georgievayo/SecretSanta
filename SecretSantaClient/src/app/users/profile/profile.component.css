@@ -13,3 +13,8 @@
       margin-bottom:10px;
       
   }
+
+  #modal-btn {
+      background-color: rgb(99, 92, 92);
+      color: white;
+  }

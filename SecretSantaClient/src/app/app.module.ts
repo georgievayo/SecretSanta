@@ -26,11 +26,11 @@ import { FormsModule } from '@angular/forms';
     BrowserModule,
     SharedModule,
     CoreModule,
-    UsersModule,
     RequestsModule,
     GroupsModule,
     AppRoutes,
-    FormsModule
+    FormsModule,
+    UsersModule    
   ],
   providers: [],
   bootstrap: [AppComponent]
