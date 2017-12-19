@@ -6,9 +6,23 @@ export class GroupsService {
 
 constructor(private http: Http) { }
 
+
 createGroup(groupName) {
     const options = this.getHeaders();
     return this.http.post(`http://localhost:2835/api/groups`, JSON.stringify(groupName), options)
+        .map(res => res.json());
+}
+
+getUserGroups(username, skip, take) {
+    const options = this.getHeaders();
+    return this.http.get(`http://localhost:2835/api/users/${username}/groups?skip=${skip}&take=${take}`, options)
+        .map(res => res.json());
+}
+
+getGroup(groupName) {
+    const options = this.getHeaders();
+    console.log(groupName);
+    return this.http.get(`http://localhost:2835/api/groups/${groupName}`, options)
         .map(res => res.json());
 }
 

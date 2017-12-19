@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { UsersComponent } from './users.component';
 import { ProfileComponent } from './profile/profile.component';
 import { UserShortComponent } from './user-short/user-short.component';
+import { UserGroupsListComponent } from './user-groups-list/user-groups-list.component';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { UserShortComponent } from './user-short/user-short.component';
   ],
   declarations: [UsersComponent,
     ProfileComponent,
-    UserShortComponent
+    UserShortComponent,
+    UserGroupsListComponent
 ]
 })
 export class UsersModule { }

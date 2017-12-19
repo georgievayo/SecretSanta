@@ -24,6 +24,17 @@ acceptRequest(username, groupName) {
         .map(res => res.json());
 }
 
+sendRequest(username, groupName) {
+    const options = this.getHeaders();
+    const request = {
+        groupName: groupName,
+        date: new Date()
+    };
+
+    return this.http.post(`http://localhost:2835/api/users/${username}/requests`, JSON.stringify(request), options)
+    .map(res => res.json());
+}
+
 private getHeaders() {
     const headers = new Headers();
     headers.append('Content-Type', 'application/json');

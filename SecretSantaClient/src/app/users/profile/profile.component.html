@@ -17,8 +17,9 @@
               <li><p><span class="glyphicon glyphicon-map-marker one" style="width:50px;"></span>{{user?.Address}}</p></li>
               <li><p><span class="glyphicon glyphicon-list one" style="width:50px;"></span>{{user?.Interests}}</p></li>
             </ul>
-            <button type="button" class="btn" id="modal-btn" data-toggle="modal" data-target="#myModal">Create group</button>
-
+            <button type="button" class="btn" id="modal-btn" data-toggle="modal" data-target="#creteModal">Create group</button>
+            <button type="button" class="btn" id="modal-btn" data-toggle="modal" data-target="#groupsModal">Show my groups</button>            
             <app-create-group></app-create-group>
+            <app-groups [currentUserUsername]="username"></app-groups>
         </div>
     </div>

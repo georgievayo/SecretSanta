@@ -19,7 +19,6 @@ using SecretSanta.Services.Interfaces;
 
 namespace SecretSanta.API.Controllers
 {
-
     [RoutePrefix("api/users")]
     [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
     public class UsersController : ApiController
@@ -131,6 +130,7 @@ namespace SecretSanta.API.Controllers
 
             var users = this._usersService
                 .GetUsers(criteria.Skip, criteria.Take, criteria.Order, criteria.Search)
+                .Select(u => new { Id = u.Id, UserName = u.UserName,  DisplayName = u.DisplayName, PhoneNumber = u.PhoneNumber, Email = u.Email})
                 .ToList();
 
             return Ok(users);
@@ -148,11 +148,12 @@ namespace SecretSanta.API.Controllers
 
             try
             {
-                var groups = this._usersService.GetUserGroups(username, criteria.Skip, criteria.Take);
+                var groups = this._usersService.GetUserGroups(username, criteria.Skip, criteria.Take)
+                     .Select(g => new {GroupName = g.Name});
                 // should be mapped
                 return Ok(groups);
             }
-            catch (ArgumentNullException ex)
+            catch (ArgumentNullException)
             {
                 return NotFound();
             }
@@ -215,7 +216,7 @@ namespace SecretSanta.API.Controllers
         [Route("{username}/requests")]
         public IHttpActionResult SendRequest(string username, [FromBody] RequestViewModel request)
         {
-            if (username == null || request.GroupName == null || request.OwnerName == null)
+            if (username == null || request.GroupName == null)
             {
                 return BadRequest();
             }

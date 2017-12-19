@@ -24,6 +24,30 @@ namespace SecretSanta.API.Controllers
             this._usersService = usersService;
         }
 
+        [HttpGet]
+        [Route("{groupName}")]
+        public IHttpActionResult GetGroup([FromUri] string groupName)
+        {
+            if (groupName == null)
+            {
+                return BadRequest();
+            }
+
+            var currentUserId = RequestContext.Principal.Identity.GetUserId();
+            var group = this._groupsService.GetGroupByName(groupName);
+
+            if (group.OwnerId == currentUserId)
+            {
+                var model = new { GroupName = group.Name, Owner = group.Owner.DisplayName, Participants = group.Users };
+                return Ok(model);
+            }
+            else
+            {
+                var model = new { GroupName = group.Name, Owner = group.Owner.DisplayName };
+                return Ok(model);
+            }
+        }
+
         [HttpPost]
         [Route("")]
         public IHttpActionResult CreateGroup([FromBody] string groupName)
@@ -31,6 +55,7 @@ namespace SecretSanta.API.Controllers
             var currentUserId = RequestContext.Principal.Identity.GetUserId();
             try
             {
+                // should be added to owner's collection
                 var group = this._groupsService.CreateGroup(groupName, currentUserId);
 
                 if (group == null)
@@ -40,11 +65,13 @@ namespace SecretSanta.API.Controllers
 
                 return Created("~api/groups", group);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Content(HttpStatusCode.Conflict, "The name should be unique!");
             }
         }
+
+        
 
         [HttpGet]
         [Route("{groupName}/participants")]

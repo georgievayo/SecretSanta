@@ -1,3 +1,4 @@
+import { GroupsComponent } from './../groups/groups.component';
 import { CreateGroupComponent } from './../groups/create-group/create-group.component';
 import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
@@ -13,14 +14,16 @@ import { FooterComponent } from './footer/footer.component';
   declarations: [
     HeaderComponent,
     FooterComponent,
-    CreateGroupComponent
-],
+    CreateGroupComponent,
+    GroupsComponent
+  ],
 exports: [
   CommonModule,
   RouterModule,
   HeaderComponent,
   FooterComponent,
-  CreateGroupComponent
-]
+  CreateGroupComponent,
+  GroupsComponent
+  ]
 })
 export class SharedModule { }

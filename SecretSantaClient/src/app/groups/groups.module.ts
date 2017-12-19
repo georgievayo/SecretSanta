@@ -8,7 +8,7 @@ import { CreateGroupComponent } from './create-group/create-group.component';
   imports: [
     CommonModule
   ],
-  declarations: [GroupsComponent,
+  declarations: [
     GroupComponent,
 ]
 })
