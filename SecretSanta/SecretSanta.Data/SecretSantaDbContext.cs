@@ -22,7 +22,7 @@ namespace SecretSanta.Data
 
         public DbSet<Request> Requests { get; set; }
 
-        public DbSet<Present> Presents { get; set; }
+        public DbSet<Connection> Presents { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

@@ -10,7 +10,7 @@ namespace SecretSanta.Models
     {
         public User()
         {
-            this.Presents = new HashSet<Present>();
+            this.Connections = new HashSet<Connection>();
             this.Requests = new HashSet<Request>();
             this.Groups = new HashSet<Group>();
         }
@@ -24,7 +24,7 @@ namespace SecretSanta.Models
 
         public string Interests { get; set; }
 
-        public virtual ICollection<Present> Presents { get; set; }
+        public virtual ICollection<Connection> Connections { get; set; }
 
         public virtual ICollection<Request> Requests { get; set; }
 

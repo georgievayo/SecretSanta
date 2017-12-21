@@ -27,12 +27,17 @@ namespace SecretSanta.API.Controllers
         private readonly IUsersService _usersService;
         private readonly IGroupsService _groupsService;
         private readonly IRequestsService _requestsService;
+        private readonly IConnectionsService _connectionsService;
 
-        public UsersController(IUsersService usersService, IGroupsService groupsService, IRequestsService requestsService)
+        public UsersController(IUsersService usersService, 
+            IGroupsService groupsService, 
+            IRequestsService requestsService,
+            IConnectionsService connectionsService)
         {
             this._usersService = usersService;
             this._groupsService = groupsService;
             this._requestsService = requestsService;
+            this._connectionsService = connectionsService;
         }
 
         public ApplicationUserManager UserManager
@@ -158,6 +163,21 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("{username}/groups/{groupName}/connections")]
+        public IHttpActionResult GetUserConnectionInGroup(string username, string groupName)
+        {
+            var connection = this._connectionsService.GetUserConnection(username, groupName);
+            if (connection == null)
+            {
+                return NotFound();
+            }
+
+            var result = new {receiver = connection.To.UserName};
+            return Ok(result);
         }
 
         [HttpGet]

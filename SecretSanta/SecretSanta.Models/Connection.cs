@@ -2,7 +2,7 @@
 
 namespace SecretSanta.Models
 {
-    public class Present
+    public class Connection
     {
         public Guid Id { get; set; }
 

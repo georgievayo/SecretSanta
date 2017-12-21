@@ -8,8 +8,8 @@ namespace SecretSanta.Data.Mappings
     {
         public UserMap()
         {
-            this.HasMany(x => x.Presents).WithRequired(x => x.From);
-            this.HasMany(x => x.Presents).WithRequired(x => x.To);
+            this.HasMany(x => x.Connections).WithRequired(x => x.From);
+            this.HasMany(x => x.Connections).WithRequired(x => x.To);
             this.HasMany(x => x.Groups).WithMany(x => x.Users);
             this.HasMany(x => x.Requests).WithRequired(x => x.To);
         }

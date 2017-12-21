@@ -26,6 +26,11 @@ namespace SecretSanta.Services
                 .FirstOrDefault(u => u.UserName == username);
         }
 
+        public User GetUserById(string id)
+        {
+            return this._repository.GetById(id);
+        }
+
         public IEnumerable<User> GetUsers(int skip, int take, string order, string search)
         {
             if (order.ToLower() == "asc")

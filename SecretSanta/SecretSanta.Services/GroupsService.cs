@@ -4,7 +4,7 @@ using System.Linq;
 using SecretSanta.Models;
 using SecretSanta.Services.Interfaces;
 using SecretSanta.Data.Interfaces;
-
+using System.Collections.Generic;
 
 namespace SecretSanta.Services
 {
@@ -19,13 +19,14 @@ namespace SecretSanta.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public Group CreateGroup(string name, string ownerId)
+        public Group CreateGroup(string name, User owner)
         {
             var group = new Group()
             {
                 Id = Guid.NewGuid(),
                 Name = name,
-                OwnerId = ownerId
+                Owner = owner,
+                Users = new List<User>() { owner }
             };
 
             this._repository.Add(group);
@@ -58,6 +59,17 @@ namespace SecretSanta.Services
                 .All
                 .Include(g => g.Users)
                 .FirstOrDefault(g => g.Name == name);
+        }
+
+        public ICollection<User> GetParticipantsOfGroup(string groupName)
+        {
+            var group = this._repository.All.FirstOrDefault(g => g.Name == groupName);
+            if (group == null)
+            {
+                throw new ArgumentNullException(nameof(group));
+            }
+
+            return group.Users;
         }
     }
 }

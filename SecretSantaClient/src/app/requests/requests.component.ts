@@ -31,6 +31,7 @@ export class RequestsComponent implements OnInit {
   accept(username, groupName, requestId) {
     this.requestsService.acceptRequest(username, groupName)
     .subscribe(res => console.log(res));
-    //this.requestsService.deleteRequest(username, requestId).subscribe(res => res);
+    this.requestsService.deleteRequest(username, requestId)
+    .subscribe(res => res);
   }
 }
