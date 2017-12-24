@@ -52,15 +52,6 @@ namespace SecretSanta.API.Controllers
             }
         }
 
-        [HttpDelete]
-        [Authorize]
-        [Route("logins")]
-        public IHttpActionResult Logout()
-        {
-            Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
-            return Ok();
-        }
-
         [AllowAnonymous]
         [HttpPost]
         [Route("")]
