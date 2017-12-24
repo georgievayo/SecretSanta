@@ -1,0 +1,25 @@
+<div class="container col-md-7 col-md-offset-6" id="profile">    
+  <div class="jumbotron">
+    <div class="row">
+        <div class="col-md-2 col-xs-12 col-sm-6 col-lg-2">
+            <img src="https://gallery.yopriceville.com/var/albums/Free-Clipart-Pictures/Christmas-PNG/Transparent_Santa_Claus.png?m=1380232800" class="img-rounded" width="180" alt="stack photo">
+        </div>
+        <div class="col-md-7 col-md-offset-2 col-xs-12 col-sm-6 col-lg-8">
+            <div class="container" style="border-bottom:1px solid black">
+              <h2>{{user?.DisplayName}}</h2>
+            </div>
+              <br/>
+            <ul class="container details">
+              <li><p><span class="glyphicon glyphicon-user one" style="width:50px;"></span>{{user?.Username}}</p></li>                
+              <li><p><span class="glyphicon glyphicon-phone one" style="width:50px;"></span>{{user?.PhoneNumber}}</p></li>
+              <li><p><span class="glyphicon glyphicon-envelope one" style="width:50px;"></span>{{user?.Email}}</p></li>
+              <li><p><span class="glyphicon glyphicon-user one" style="width:50px;"></span>{{user?.Age}}</p></li>                              
+              <li><p><span class="glyphicon glyphicon-map-marker one" style="width:50px;"></span>{{user?.Address}}</p></li>
+              <li><p><span class="glyphicon glyphicon-list one" style="width:50px;"></span>{{user?.Interests}}</p></li>
+            </ul>
+            <button type="button" class="btn" id="modal-btn" data-toggle="modal" data-target="#creteModal">Create group</button>
+            <button type="button" class="btn" id="modal-btn" data-toggle="modal" data-target="#groupsModal">Show my groups</button>            
+            <app-create-group></app-create-group>
+            <app-groups [currentUserUsername]="username"></app-groups>
+        </div>
+    </div>

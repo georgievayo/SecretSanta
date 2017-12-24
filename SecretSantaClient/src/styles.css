@@ -1,0 +1,8 @@
+/* You can add global styles to this file, and also import other style files */
+body {
+    background-image: url("https://i.ytimg.com/vi/GQvHtTun0oE/maxresdefault.jpg");
+    background-repeat: no-repeat;
+    background-size:100%;
+    background-attachment: fixed;
+    margin-top: 0;
+}

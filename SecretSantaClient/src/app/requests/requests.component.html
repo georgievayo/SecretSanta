@@ -1,0 +1,20 @@
+<div class="container col-md-offset-5 col-md-8" id="requests">
+  <div class="row col-md-12 custyle">
+    <table class="table table-striped custab" *ngIf="requests">
+      <thead>
+        <tr>
+          <th>Group <a><span class="glyphicon glyphicon-sort-by-alphabet-alt"></span></a></th>
+          <th>Owner </th>
+          <th>Received at</th>
+          <th class="text-center">Action</th>
+        </tr>
+      </thead>
+      <tr *ngFor="let request of requests">
+        <td>{{request?.GroupName}}</td>
+        <td>{{request?.OwnerName}}</td>        
+        <td>{{request?.Date | date: 'dd/MM/yyyy hh:mm'}}</td>
+        <td class="text-center"><a class='btn btn-info btn-xs' (click)="accept(username, request.GroupName, request.Id)"><span class="glyphicon glyphicon-edit"></span> Accept</a> <a (click)="decline(username, request.Id)" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Decline</a></td>
+      </tr>
+    </table>
+  </div>
+</div>
