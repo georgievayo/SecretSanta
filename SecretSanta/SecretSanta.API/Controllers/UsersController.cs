@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
-using Microsoft.Owin.Security.Cookies;
 using SecretSanta.API.Models;
 using SecretSanta.Models;
 using SecretSanta.Services.Interfaces;
@@ -28,6 +22,8 @@ namespace SecretSanta.API.Controllers
         private readonly IGroupsService _groupsService;
         private readonly IRequestsService _requestsService;
         private readonly IConnectionsService _connectionsService;
+        private string _currentUserUsername;
+        private string _currentUserId;
 
         public UsersController(IUsersService usersService, 
             IGroupsService groupsService, 
@@ -50,6 +46,12 @@ namespace SecretSanta.API.Controllers
             {
                 _userManager = value;
             }
+        }
+
+        public void SetCurrentUser(string id, string username)
+        {
+            this._currentUserId = id;
+            this._currentUserUsername = username;
         }
 
         [AllowAnonymous]
@@ -75,16 +77,10 @@ namespace SecretSanta.API.Controllers
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
 
-            if (!result.Succeeded)
-            {
-                return GetErrorResult(result);
-            }
-
             return Created("~api/users", user);
         }
 
         [HttpGet]
-        [Authorize]
         [Route("{username}")]
         public IHttpActionResult GetProfile(string username)
         {
@@ -115,7 +111,6 @@ namespace SecretSanta.API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         [Route("")]
         public IHttpActionResult GetAllUsers([FromUri]ViewCriteria criteria)
         {
@@ -133,7 +128,6 @@ namespace SecretSanta.API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         [Route("{username}/groups")]
         public IHttpActionResult GetUserGroups(string username, [FromUri]PagingCriteria criteria)
         {
@@ -146,7 +140,7 @@ namespace SecretSanta.API.Controllers
             {
                 var groups = this._usersService.GetUserGroups(username, criteria.Skip, criteria.Take)
                      .Select(g => new {GroupName = g.Name});
-                // should be mapped
+
                 return Ok(groups);
             }
             catch (ArgumentNullException)
@@ -157,7 +151,6 @@ namespace SecretSanta.API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         [Route("{username}/groups/{groupName}/connections")]
         public IHttpActionResult GetUserConnectionInGroup(string username, string groupName)
         {
@@ -187,13 +180,12 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
-            if (currentUserId != user.Id)
+            if (this._currentUserId != user.Id)
             {
                 return Content(HttpStatusCode.Forbidden, "You cannot see other's requests.");
             }
 
-            var requests = this._requestsService.GetUserRequests(currentUserId)
+            var requests = this._requestsService.GetUserRequests(this._currentUserId)
                 .Skip(criteria.Skip)
                 .Take(criteria.Take)
                 .Select(r => new RequestViewModel()
@@ -223,7 +215,6 @@ namespace SecretSanta.API.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [Route("{username}/requests")]
         public IHttpActionResult SendRequest(string username, [FromBody] RequestViewModel request)
         {
@@ -239,8 +230,7 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            var currentUserUsername = RequestContext.Principal.Identity.Name;
-            if (currentUserUsername != request.OwnerName)
+            if (this._currentUserUsername != request.OwnerName)
             {
                 return Content(HttpStatusCode.Forbidden, "You cannot send requests for this group.");
             }
@@ -264,7 +254,6 @@ namespace SecretSanta.API.Controllers
         }
 
         [HttpDelete]
-        [Authorize]
         [Route("{username}/requests/{id}")]
         public IHttpActionResult DeleteRequest(string username, string id)
         {
@@ -279,8 +268,7 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            var currentUserUsername = RequestContext.Principal.Identity.Name;
-            if (user.UserName != currentUserUsername)
+            if (user.UserName != this._currentUserUsername)
             {
                 return Content(HttpStatusCode.Forbidden, "You cannot delete this request.");
             }
@@ -294,123 +282,5 @@ namespace SecretSanta.API.Controllers
             this._requestsService.DeleteRequest(request);
             return Content(HttpStatusCode.NoContent, "Deleted");
         }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && _userManager != null)
-            {
-                _userManager.Dispose();
-                _userManager = null;
-            }
-
-            base.Dispose(disposing);
-        }
-
-        #region Helpers
-
-        private IAuthenticationManager Authentication
-        {
-            get { return Request.GetOwinContext().Authentication; }
-        }
-
-        private IHttpActionResult GetErrorResult(IdentityResult result)
-        {
-            if (result == null)
-            {
-                return InternalServerError();
-            }
-
-            if (!result.Succeeded)
-            {
-                if (result.Errors != null)
-                {
-                    foreach (string error in result.Errors)
-                    {
-                        ModelState.AddModelError("", error);
-                    }
-                }
-
-                if (ModelState.IsValid)
-                {
-                    // No ModelState errors are available to send, so just return an empty BadRequest.
-                    return BadRequest();
-                }
-
-                return BadRequest(ModelState);
-            }
-
-            return null;
-        }
-
-        private class ExternalLoginData
-        {
-            public string LoginProvider { get; set; }
-            public string ProviderKey { get; set; }
-            public string UserName { get; set; }
-
-            public IList<Claim> GetClaims()
-            {
-                IList<Claim> claims = new List<Claim>();
-                claims.Add(new Claim(ClaimTypes.NameIdentifier, ProviderKey, null, LoginProvider));
-
-                if (UserName != null)
-                {
-                    claims.Add(new Claim(ClaimTypes.Name, UserName, null, LoginProvider));
-                }
-
-                return claims;
-            }
-
-            public static ExternalLoginData FromIdentity(ClaimsIdentity identity)
-            {
-                if (identity == null)
-                {
-                    return null;
-                }
-
-                Claim providerKeyClaim = identity.FindFirst(ClaimTypes.NameIdentifier);
-
-                if (providerKeyClaim == null || String.IsNullOrEmpty(providerKeyClaim.Issuer)
-                    || String.IsNullOrEmpty(providerKeyClaim.Value))
-                {
-                    return null;
-                }
-
-                if (providerKeyClaim.Issuer == ClaimsIdentity.DefaultIssuer)
-                {
-                    return null;
-                }
-
-                return new ExternalLoginData
-                {
-                    LoginProvider = providerKeyClaim.Issuer,
-                    ProviderKey = providerKeyClaim.Value,
-                    UserName = identity.FindFirstValue(ClaimTypes.Name)
-                };
-            }
-        }
-
-        private static class RandomOAuthStateGenerator
-        {
-            private static RandomNumberGenerator _random = new RNGCryptoServiceProvider();
-
-            public static string Generate(int strengthInBits)
-            {
-                const int bitsPerByte = 8;
-
-                if (strengthInBits % bitsPerByte != 0)
-                {
-                    throw new ArgumentException("strengthInBits must be evenly divisible by 8.", "strengthInBits");
-                }
-
-                int strengthInBytes = strengthInBits / bitsPerByte;
-
-                byte[] data = new byte[strengthInBytes];
-                _random.GetBytes(data);
-                return HttpServerUtility.UrlTokenEncode(data);
-            }
-        }
-
-        #endregion
     }
 }

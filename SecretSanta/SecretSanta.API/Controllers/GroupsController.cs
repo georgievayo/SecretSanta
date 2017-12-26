@@ -11,7 +11,7 @@ using SecretSanta.Services.Interfaces;
 
 namespace SecretSanta.API.Controllers
 {
-    [Authorize]
+    
     [RoutePrefix("api/groups")]
     [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
     public class GroupsController : ApiController
@@ -19,6 +19,7 @@ namespace SecretSanta.API.Controllers
         private readonly IGroupsService _groupsService;
         private readonly IUsersService _usersService;
         private readonly IConnectionsService _connectionsService;
+        private string _currentUserId;
 
         public GroupsController(IGroupsService groupsService, 
             IUsersService usersService, 
@@ -27,6 +28,11 @@ namespace SecretSanta.API.Controllers
             this._groupsService = groupsService;
             this._usersService = usersService;
             this._connectionsService = connectionsService;
+        }
+
+        public void SetCurrentUserId(string id)
+        {
+            this._currentUserId = id;
         }
 
         [HttpGet]
@@ -38,10 +44,9 @@ namespace SecretSanta.API.Controllers
                 return BadRequest();
             }
 
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
             var group = this._groupsService.GetGroupByName(groupName);
 
-            if (group.OwnerId == currentUserId)
+            if (group.OwnerId == this._currentUserId)
             {
                 var model = new { GroupName = group.Name, Owner = group.Owner.DisplayName, Participants = group.Users };
                 return Ok(model);
@@ -57,11 +62,9 @@ namespace SecretSanta.API.Controllers
         [Route("")]
         public IHttpActionResult CreateGroup([FromBody] string groupName)
         {
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
             try
             {
-                var currentUser = this._usersService.GetUserById(currentUserId);
-                // should be added to owner's collection
+                var currentUser = this._usersService.GetUserById(this._currentUserId);
                 var group = this._groupsService.CreateGroup(groupName, currentUser);
 
                 if (group == null)
@@ -86,7 +89,6 @@ namespace SecretSanta.API.Controllers
                 return BadRequest();
             }
 
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
             var group = this._groupsService.GetGroupByName(groupName);
 
             if (group == null)
@@ -94,7 +96,7 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            if (group.OwnerId != currentUserId)
+            if (group.OwnerId != this._currentUserId)
             {
                 return Content(HttpStatusCode.Forbidden, new List<ParticipantViewModel>());
             }
@@ -152,8 +154,7 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
-            if (group.OwnerId != currentUserId)
+            if (group.OwnerId != this._currentUserId)
             {
                 return Content(HttpStatusCode.Forbidden, "Not an owner");
             }
@@ -177,8 +178,7 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
-            if (group.OwnerId != currentUserId)
+            if (group.OwnerId != this._currentUserId)
             {
                 return Content(HttpStatusCode.Forbidden, "Not an owner");
             }
