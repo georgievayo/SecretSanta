@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
-using SecretSanta.Data.Interfaces;
+﻿using SecretSanta.Data.Interfaces;
 using SecretSanta.Models;
 using SecretSanta.Services.Interfaces;
 using System;
@@ -33,6 +32,7 @@ namespace SecretSanta.Services
             var userId = user.Id;
             var userSession = new UserSession()
             {
+                Id = Guid.NewGuid(),
                 UserId = userId,
                 AuthToken = authToken,
                 ExpirationDateTime = DateTime.Now + new TimeSpan(0, 30, 0)
@@ -107,17 +107,5 @@ namespace SecretSanta.Services
             }
             return authToken;
         }
-
-        private string GetCurrentUserId()
-        {
-            if (HttpContext.Current.User == null)
-            {
-                return null;
-            }
-
-            string userId = HttpContext.Current.User.Identity.GetUserId();
-            return userId;
-        }
-
     }
 }

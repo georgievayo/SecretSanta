@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNet.Identity;
-using Microsoft.Owin.Security;
 using Microsoft.Owin.Testing;
 using SecretSanta.API.Models;
 using SecretSanta.Services.Interfaces;
@@ -17,14 +16,6 @@ namespace SecretSanta.API.Controllers
     {
         private readonly IAccountsService _accountsService;
 
-        private IAuthenticationManager Authentication
-        {
-            get
-            {
-                return Request.GetOwinContext().Authentication;
-            }
-        }
-
         public AccountController(IAccountsService accountsService)
         {
             this._accountsService = accountsService;
@@ -33,7 +24,7 @@ namespace SecretSanta.API.Controllers
         [HttpPost]
         [Route("")]
         [AllowAnonymous]
-        public async Task<IHttpActionResult> LoginUser(LoginViewModel model)
+        public async Task<IHttpActionResult> Login(LoginViewModel model)
         {
             if (model == null)
             {
@@ -72,7 +63,7 @@ namespace SecretSanta.API.Controllers
         [Route("")]
         public IHttpActionResult Logout()
         {
-            this.Authentication.SignOut(DefaultAuthenticationTypes.ExternalBearer);
+            Request.GetOwinContext().Authentication.SignOut(DefaultAuthenticationTypes.ExternalBearer);
             this._accountsService.InvalidateUserSession();
 
             return this.Ok();

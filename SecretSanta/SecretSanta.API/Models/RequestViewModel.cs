@@ -4,12 +4,20 @@ namespace SecretSanta.API.Models
 {
     public class RequestViewModel
     {
-        public string GroupName { get; set; }
+        public RequestViewModel(Guid id, string groupName, string ownerName, DateTime date)
+        {
+            Id = id;
+            GroupName = groupName;
+            OwnerName = ownerName;
+            Date = date;
+        }
 
-        public DateTime Date { get; set; }
+        public Guid Id { get; set; }
+
+        public string GroupName { get; set; }
 
         public string OwnerName { get; set; }
 
-        public Guid? Id { get; set; }
+        public DateTime Date { get; set; }
     }
 }

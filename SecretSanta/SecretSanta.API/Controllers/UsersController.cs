@@ -76,15 +76,25 @@ namespace SecretSanta.API.Controllers
             };
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                var resultModel = new UserProfileViewModel(user.Email, user.UserName, user.Age, user.Interests,
+                    user.PhoneNumber, user.DisplayName, user.Address);
 
-            return Created("~api/users", user);
+                return Content(HttpStatusCode.Created, resultModel);
+            }
+            else
+            {
+                return Content(HttpStatusCode.Conflict, "There is user with the same username!");
+            }
+            
         }
 
         [HttpGet]
         [Route("{username}")]
-        public IHttpActionResult GetProfile(string username)
+        public IHttpActionResult GetProfile([FromUri] string username)
         {
-            if (username == null)
+            if (string.IsNullOrEmpty(username))
             {
                 return BadRequest();
             }
@@ -95,17 +105,8 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            var model = new UserProfileViewModel()
-            {
-                Username = user.UserName,
-                DisplayName = user.DisplayName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Address = user.Address,
-                Age = user.Age,
-                Interests = user.Interests,
-                PhotoUrl = user.PhotoUrl
-            };
+            var model = new UserProfileViewModel(user.Email, user.UserName, user.Age, 
+                user.Interests, user.PhoneNumber, user.DisplayName, user.Address);
 
             return Ok(model);
         }
@@ -121,7 +122,7 @@ namespace SecretSanta.API.Controllers
 
             var users = this._usersService
                 .GetUsers(criteria.Skip, criteria.Take, criteria.Order, criteria.Search)
-                .Select(u => new { Id = u.Id, UserName = u.UserName,  DisplayName = u.DisplayName, PhoneNumber = u.PhoneNumber, Email = u.Email})
+                .Select(u => new UserShortViewModel(u.UserName, u.DisplayName, u.PhoneNumber, u.Email))
                 .ToList();
 
             return Ok(users);
@@ -131,7 +132,7 @@ namespace SecretSanta.API.Controllers
         [Route("{username}/groups")]
         public IHttpActionResult GetUserGroups(string username, [FromUri]PagingCriteria criteria)
         {
-            if (username == null)
+            if (string.IsNullOrEmpty(username))
             {
                 return BadRequest();
             }
@@ -139,7 +140,7 @@ namespace SecretSanta.API.Controllers
             try
             {
                 var groups = this._usersService.GetUserGroups(username, criteria.Skip, criteria.Take)
-                     .Select(g => new {GroupName = g.Name});
+                     .Select(g => new { GroupName = g.Name });
 
                 return Ok(groups);
             }
@@ -152,24 +153,31 @@ namespace SecretSanta.API.Controllers
 
         [HttpGet]
         [Route("{username}/groups/{groupName}/connections")]
-        public IHttpActionResult GetUserConnectionInGroup(string username, string groupName)
+        public IHttpActionResult GetUserConnectionInGroup([FromUri] string username, [FromUri] string groupName)
         {
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(groupName))
+            {
+                return BadRequest();
+            }
+
             var connection = this._connectionsService.GetUserConnection(username, groupName);
             if (connection == null)
             {
                 return NotFound();
             }
 
-            var result = new {receiver = connection.To.UserName};
+            var result = new SecretSantaViewModel(connection.To.UserName);
+
             return Ok(result);
         }
 
         [HttpGet]
         [Authorize]
         [Route("{username}/requests")]
-        public IHttpActionResult GetAllRequests(string username, [FromUri] ViewCriteria criteria)
+        public IHttpActionResult GetAllRequests([FromUri] string username, [FromUri] ViewCriteria criteria)
         {
-            if (criteria.Order.ToLower() != "asc" && criteria.Order.ToLower() != "desc")
+            if (string.IsNullOrEmpty(username) || 
+                (criteria.Order.ToLower() != "asc" && criteria.Order.ToLower() != "desc"))
             {
                 return BadRequest();
             }
@@ -182,43 +190,20 @@ namespace SecretSanta.API.Controllers
 
             if (this._currentUserId != user.Id)
             {
-                return Content(HttpStatusCode.Forbidden, "You cannot see other's requests.");
+                return Content(HttpStatusCode.Forbidden, "You can see only your requests.");
             }
 
-            var requests = this._requestsService.GetUserRequests(this._currentUserId)
-                .Skip(criteria.Skip)
-                .Take(criteria.Take)
-                .Select(r => new RequestViewModel()
-                {
-                    Date = r.ReceivedAt,
-                    GroupName = r.Group.Name,
-                    OwnerName = r.Group.Owner.DisplayName,
-                    Id = r.Id
-                });
+            var requests = this._requestsService.GetUserRequests(this._currentUserId, criteria.Order, criteria.Skip, criteria.Take)
+                .Select(r => new RequestViewModel(r.Id, r.Group.Name, r.Group.Owner.DisplayName, r.ReceivedAt));
 
-            if (criteria.Order.ToLower() == "asc")
-            {
-                var ordered = requests
-                    .OrderBy(r => r.Date)
-                    .ToList();
-
-                return Ok(ordered);
-            }
-            else
-            {
-                var ordered = requests
-                    .OrderByDescending(r => r.Date)
-                    .ToList();
-
-                return Ok(ordered);
-            }
+            return Ok(requests);
         }
 
         [HttpPost]
         [Route("{username}/requests")]
-        public IHttpActionResult SendRequest(string username, [FromBody] RequestViewModel request)
+        public IHttpActionResult SendRequest([FromUri] string username, [FromBody] RequestViewModel request)
         {
-            if (username == null || request.GroupName == null)
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(request.GroupName))
             {
                 return BadRequest();
             }
@@ -250,14 +235,17 @@ namespace SecretSanta.API.Controllers
             };
 
             this._usersService.AddRequest(requestToSend, user);
-            return Created("requests", requestToSend);
+            var result = new RequestViewModel(requestToSend.Id, requestToSend.Group.Name, requestToSend.To.UserName,
+                requestToSend.ReceivedAt);
+
+            return Content(HttpStatusCode.Created, result);
         }
 
         [HttpDelete]
         [Route("{username}/requests/{id}")]
-        public IHttpActionResult DeleteRequest(string username, string id)
+        public IHttpActionResult DeleteRequest([FromUri] string username, [FromUri] string id)
         {
-            if (username == null || id == null)
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(id))
             {
                 return BadRequest();
             }
@@ -270,7 +258,7 @@ namespace SecretSanta.API.Controllers
 
             if (user.UserName != this._currentUserUsername)
             {
-                return Content(HttpStatusCode.Forbidden, "You cannot delete this request.");
+                return Content(HttpStatusCode.Forbidden, "You can delete only your requests.");
             }
 
             var request = user.Requests.First(r => r.Id == Guid.Parse(id));
@@ -280,7 +268,7 @@ namespace SecretSanta.API.Controllers
             }
 
             this._requestsService.DeleteRequest(request);
-            return Content(HttpStatusCode.NoContent, "Deleted");
+            return Content(HttpStatusCode.NoContent, "The request was deleted!");
         }
     }
 }
