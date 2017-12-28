@@ -4,14 +4,13 @@ using System.Linq;
 using System.Net;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using Microsoft.AspNet.Identity;
 using SecretSanta.API.Models;
 using SecretSanta.Models;
 using SecretSanta.Services.Interfaces;
 
 namespace SecretSanta.API.Controllers
 {
-    [Authorize]
+
     [RoutePrefix("api/groups")]
     [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
     public class GroupsController : ApiController
@@ -19,6 +18,7 @@ namespace SecretSanta.API.Controllers
         private readonly IGroupsService _groupsService;
         private readonly IUsersService _usersService;
         private readonly IConnectionsService _connectionsService;
+        private string _currentUserId;
 
         public GroupsController(IGroupsService groupsService, 
             IUsersService usersService, 
@@ -27,6 +27,11 @@ namespace SecretSanta.API.Controllers
             this._groupsService = groupsService;
             this._usersService = usersService;
             this._connectionsService = connectionsService;
+        }
+
+        public void SetCurrentUserId(string id)
+        {
+            this._currentUserId = id;
         }
 
         [HttpGet]
@@ -38,38 +43,42 @@ namespace SecretSanta.API.Controllers
                 return BadRequest();
             }
 
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
             var group = this._groupsService.GetGroupByName(groupName);
 
-            if (group.OwnerId == currentUserId)
+            if (group.OwnerId == this._currentUserId)
             {
-                var model = new { GroupName = group.Name, Owner = group.Owner.DisplayName, Participants = group.Users };
+                var model = new GroupViewModel(group.Name, group.Owner.DisplayName, group.Users);
                 return Ok(model);
             }
             else
             {
-                var model = new { GroupName = group.Name, Owner = group.Owner.DisplayName };
+                var model = new GroupViewModel(group.Name, group.Owner.DisplayName);
                 return Ok(model);
             }
         }
 
         [HttpPost]
         [Route("")]
-        public IHttpActionResult CreateGroup([FromBody] string groupName)
+        public IHttpActionResult CreateGroup([FromBody] CreateGroupViewModel groupModel)
         {
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
             try
             {
-                var currentUser = this._usersService.GetUserById(currentUserId);
-                // should be added to owner's collection
-                var group = this._groupsService.CreateGroup(groupName, currentUser);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var currentUser = this._usersService.GetUserById(this._currentUserId);
+                var group = this._groupsService.CreateGroup(groupModel.Name, currentUser);
 
                 if (group == null)
                 {
                     return BadRequest();
                 }
 
-                return Created("~api/groups", group);
+                var model = new GroupViewModel(group.Name, group.Owner.DisplayName);
+
+                return Content(HttpStatusCode.Created, model);
             }
             catch (Exception)
             {
@@ -81,12 +90,11 @@ namespace SecretSanta.API.Controllers
         [Route("{groupName}/participants")]
         public IHttpActionResult GetParticipants(string groupName)
         {
-            if (groupName == null)
+            if (string.IsNullOrEmpty(groupName))
             {
                 return BadRequest();
             }
 
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
             var group = this._groupsService.GetGroupByName(groupName);
 
             if (group == null)
@@ -94,48 +102,42 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            if (group.OwnerId != currentUserId)
+            if (group.OwnerId != this._currentUserId)
             {
-                return Content(HttpStatusCode.Forbidden, new List<ParticipantViewModel>());
+                return Content(HttpStatusCode.Forbidden, "Only the owner of the group can see participants!");
             }
 
             var participants = group.Users
-                .Select(p => new ParticipantViewModel()
-                {
-                    Username = p.UserName,
-                    DisplayName = p.DisplayName,
-                    Email = p.Email,
-                    PhotoUrl = p.PhotoUrl
-                }
-                );
+                .Select(p => new ParticipantViewModel(p.UserName, p.DisplayName, p.Email));
 
             return Ok(participants);
         }
 
         [HttpPost]
         [Route("{groupName}/participants")]
-        public IHttpActionResult PostParticipant([FromUri] string groupName, [FromBody] string username)
+        public IHttpActionResult PostParticipant([FromUri] string groupName, [FromBody] AddParticipantViewModel userModel)
         {
-            if (groupName == null || username == null)
+            if (string.IsNullOrEmpty(groupName) || !ModelState.IsValid)
             {
                 return BadRequest();
             }
 
-            var user = this._usersService.GetUserByUsername(username);
+            var user = this._usersService.GetUserByUsername(userModel.Username);
             if (user == null)
             {
                 return NotFound();
             }
-            // Should return 403 if user has not such request
+
             this._groupsService.AddUserToGroup(groupName, user);
-            return Created("participants", user);
+
+            return Content(HttpStatusCode.Created, "The user was added!");
         }
 
         [HttpDelete]
         [Route("{groupName}/participants/{username}")]
-        public IHttpActionResult DeleteParticipant(string groupName, string username)
+        public IHttpActionResult DeleteParticipant([FromUri]string groupName, [FromUri] string username)
         {
-            if (groupName == null || username == null)
+            if (string.IsNullOrEmpty(groupName) || string.IsNullOrEmpty(username))
             {
                 return BadRequest();
             }
@@ -145,17 +147,16 @@ namespace SecretSanta.API.Controllers
             {
                 return NotFound();
             }
-            var group = this._groupsService.GetGroupByName(groupName);
 
+            var group = this._groupsService.GetGroupByName(groupName);
             if (group == null)
             {
                 return NotFound();
             }
 
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
-            if (group.OwnerId != currentUserId)
+            if (group.OwnerId != this._currentUserId)
             {
-                return Content(HttpStatusCode.Forbidden, "Not an owner");
+                return Content(HttpStatusCode.Forbidden, "Only the owner of group can remove participants!");
             }
 
             this._groupsService.RemoveUserFromGroup(group, user);
@@ -166,7 +167,7 @@ namespace SecretSanta.API.Controllers
         [Route("{groupName}/connections")]
         public IHttpActionResult ConnectPeople([FromUri] string groupName)
         {
-            if (groupName == null)
+            if (string.IsNullOrEmpty(groupName))
             {
                 return BadRequest();
             }
@@ -177,10 +178,9 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            var currentUserId = RequestContext.Principal.Identity.GetUserId();
-            if (group.OwnerId != currentUserId)
+            if (group.OwnerId != this._currentUserId)
             {
-                return Content(HttpStatusCode.Forbidden, "Not an owner");
+                return Content(HttpStatusCode.Forbidden, "Only the owner of group can start the process of connection!");
             }
 
             var participants = this._groupsService.GetParticipantsOfGroup(groupName);
@@ -197,7 +197,7 @@ namespace SecretSanta.API.Controllers
                     participants.ElementAt(pair.Value), group);
             }
 
-            return Created($"~/api/groups/{groupName}/connections", "The process of connection was started!");
+            return Content(HttpStatusCode.Created, "The process of connection was started!");
         }
 
         private IDictionary<int, int> GenerateConnections(ICollection<User> participants)

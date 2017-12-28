@@ -24,6 +24,8 @@ namespace SecretSanta.Data
 
         public DbSet<Connection> Presents { get; set; }
 
+        public DbSet<UserSession> UserSessions { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Configurations.Add(new UserMap());

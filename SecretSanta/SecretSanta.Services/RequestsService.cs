@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SecretSanta.Data.Interfaces;
 using SecretSanta.Models;
 using SecretSanta.Services.Interfaces;
@@ -21,13 +18,30 @@ namespace SecretSanta.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public ICollection<Request> GetUserRequests(string userId)
+        public ICollection<Request> GetUserRequests(string userId, string order, int skip, int take)
         {
-            return this._repository
-                .All
-                .Where(r => r.To.Id == userId)
-                .Include(r => r.Group)
-                .ToList();
+            if (order.ToLower() == "asc")
+            {
+                return this._repository
+                    .All
+                    .Where(r => r.To.Id == userId)
+                    .Include(r => r.Group)
+                    .OrderBy(r => r.ReceivedAt)
+                    .Skip(skip)
+                    .Take(take)
+                    .ToList();
+            }
+            else
+            {
+                return this._repository
+                    .All
+                    .Where(r => r.To.Id == userId)
+                    .Include(r => r.Group)
+                    .OrderByDescending(r => r.ReceivedAt)
+                    .Skip(skip)
+                    .Take(take)
+                    .ToList();
+            }    
         }
 
         public void DeleteRequest(Request request)
