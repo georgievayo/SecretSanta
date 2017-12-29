@@ -1,5 +1,39 @@
-<p>
-  group works!
-  {{group?.GroupName}}
-  {{group?.Owner}}
-</p>
+<div class="container">
+  <div class="col-md-8 col-md-offset-5" id="group">
+    <div class="col-md-10 col-md-offset-1">
+    <div class="row">
+      <h2>{{group?.GroupName}} <small>by {{group?.OwnerName}}</small></h2>
+      <hr/>
+    </div>
+    <div class="row">
+      <button *ngIf="receiver === undefined" (click)="start()" class="btn">Start process</button>
+      <h4 *ngIf="receiver !== undefined"><span class="glyphicon glyphicon-gift"></span> You should buy a gift to <a> {{receiver}} </a>.</h4>
+    </div>
+
+    <div class="row" *ngIf="isOwner">
+      <h3>Participants</h3>
+      <div class="row col-md-12 custyle">
+          <table class="table table-striped custab">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username </th>
+                <th>Email</th>
+                <th>Phone number</th>                
+                <th class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tr *ngFor="let user of group?.Participants">
+              <td>{{user?.DisplayName}}</td>
+              <td>{{user?.Username}}</td>        
+              <td>{{user?.Email}}</td>
+              <td>{{user?.PhoneNumber}}</td>              
+              <td class="text-center"><a (click)="remove(user.Username)" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Remove</a></td>
+            </tr>
+          </table>
+          <br/>
+        </div>  
+    </div>
+  </div>
+  </div>
+</div>

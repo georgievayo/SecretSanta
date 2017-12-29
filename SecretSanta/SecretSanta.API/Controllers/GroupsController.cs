@@ -47,7 +47,11 @@ namespace SecretSanta.API.Controllers
 
             if (group.OwnerId == this._currentUserId)
             {
-                var model = new GroupViewModel(group.Name, group.Owner.DisplayName, group.Users);
+                var participants = group.Users
+                    .Select(u => new UserShortViewModel(u.UserName, u.DisplayName, u.PhoneNumber, u.Email))
+                    .ToList();
+
+                var model = new GroupViewModel(group.Name, group.Owner.DisplayName, participants);
                 return Ok(model);
             }
             else

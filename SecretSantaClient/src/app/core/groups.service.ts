@@ -24,9 +24,23 @@ getUserGroups(username, skip, take) {
 
 getGroup(groupName) {
     const options = this.getHeaders();
-    console.log(groupName);
     return this.http.get(`http://localhost:2835/api/groups/${groupName}`, options)
         .map(res => res.json());
+}
+
+startProcess(groupName) {
+    const options = this.getHeaders();
+    return this.http.put(`http://localhost:2835/api/groups/${groupName}/connections`, null, options);
+}
+
+getConnectedPerson(username, groupName) {
+    const options = this.getHeaders();
+    return this.http.get(`http://localhost:2835/api/users/${username}/groups/${groupName}/connections`, options);
+}
+
+removeParticipant(username, groupName) {
+    const options = this.getHeaders();
+    return this.http.delete(`http://localhost:2835/api/groups/${groupName}/participants/${username}`, options);
 }
 
 private getHeaders() {
