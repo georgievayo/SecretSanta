@@ -24,6 +24,7 @@ namespace SecretSanta.Services
             var group = new Group()
             {
                 Id = Guid.NewGuid(),
+                IsProcessStarted = false,
                 Name = name,
                 Owner = owner,
                 Users = new List<User>() { owner }
@@ -33,6 +34,12 @@ namespace SecretSanta.Services
             this._unitOfWork.SaveChanges();
 
             return group;
+        }
+
+        public void SetThatProcessIsStarted(Group group)
+        {
+            group.IsProcessStarted = true;
+            this._unitOfWork.SaveChanges();
         }
 
         public void AddUserToGroup(string groupName, User user)
