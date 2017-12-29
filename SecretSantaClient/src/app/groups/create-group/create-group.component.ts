@@ -1,3 +1,5 @@
+import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { GroupsService } from './../../core/groups.service';
 import { Component, OnInit } from '@angular/core';
 
@@ -8,13 +10,20 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CreateGroupComponent implements OnInit {
 
-  constructor(private groupsService: GroupsService) { }
+  constructor(private groupsService: GroupsService,
+    private toastr: ToastrService,
+    private router: Router) { }
 
   ngOnInit() {
   }
 
   create(groupName) {
     this.groupsService.createGroup(groupName)
-      .subscribe(res => console.log(res));
+      .subscribe(res => {
+        this.toastr.success(`The group ${groupName} was created.`, 'Success');
+      },
+      error => {
+        this.toastr.error(error.statusText, 'Error');
+      });
   }
 }

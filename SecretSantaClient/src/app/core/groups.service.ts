@@ -9,7 +9,10 @@ constructor(private http: Http) { }
 
 createGroup(groupName) {
     const options = this.getHeaders();
-    return this.http.post(`http://localhost:2835/api/groups`, JSON.stringify(groupName), options)
+    const group = {
+        name: groupName
+    };
+    return this.http.post(`http://localhost:2835/api/groups`, group, options)
         .map(res => res.json());
 }
 
