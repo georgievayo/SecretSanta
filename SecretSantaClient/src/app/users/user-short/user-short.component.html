@@ -4,10 +4,8 @@
            <span class="glyphicon glyphicon-user glyphicon-lg"></span>
        </div>
        <h4>Name: <a [routerLink]="user.UserName">{{user?.DisplayName}}</a></h4>
-       <p>Username: {{user?.UserName}}</p>
+       <p>Username: {{user?.Username}}</p>
        <p><span>Phone: {{user?.PhoneNumber}}</span></p>
        <p><span>Email: {{user?.Email}}</span></p>
-       <p><button type="button" class="btn" id="modal-btn" data-toggle="modal" data-target="#inviteModal">Invite to group</button></p>
    </div>
-   <app-user-groups-list [username]="user.UserName"></app-user-groups-list>
 </div>

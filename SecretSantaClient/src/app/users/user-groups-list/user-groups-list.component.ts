@@ -1,3 +1,4 @@
+import { ToastrService } from 'ngx-toastr';
 import { RequestsService } from './../../core/requests.service';
 import { GroupsService } from './../../core/groups.service';
 import { Component, OnInit, Input } from '@angular/core';
@@ -8,19 +9,26 @@ import { Component, OnInit, Input } from '@angular/core';
   styleUrls: ['./user-groups-list.component.css']
 })
 export class UserGroupsListComponent implements OnInit {
-
+  currentUserUsername;
   @Input()
   username;
   groups;
-  constructor(private groupsService: GroupsService, private requestsService: RequestsService) { }
+  constructor(private groupsService: GroupsService,
+    private requestsService: RequestsService,
+    private toastr: ToastrService) { }
 
   ngOnInit() {
-    this.groupsService.getUserGroups(this.username, 0, 10)
-      .subscribe(res => this.groups = res);
+    this.currentUserUsername = JSON.parse(localStorage.getItem('currentUser')).userName;
+    this.groupsService.getUserGroups(this.currentUserUsername, 0, 10)
+      .subscribe(res => this.groups = res,
+      error => this.toastr.error(error.statusText, 'Error'));
   }
 
   invite(groupName) {
     this.requestsService.sendRequest(this.username, groupName)
-      .subscribe(res => console.log(res));
+      .subscribe(res => {
+        this.toastr.success(`You have sent a request to ${this.username} for ${groupName} group.`, 'Success');
+      },
+      error => this.toastr.error('Something went wrong. You cannot send this request', 'Error'));
   }
 }

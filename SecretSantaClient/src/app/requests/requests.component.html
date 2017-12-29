@@ -1,9 +1,11 @@
 <div class="container col-md-offset-5 col-md-8" id="requests">
+  <h2>Your pending requests</h2>
+  <hr/>
   <div class="row col-md-12 custyle">
     <table class="table table-striped custab" *ngIf="requests">
       <thead>
         <tr>
-          <th>Group <a><span class="glyphicon glyphicon-sort-by-alphabet-alt"></span></a></th>
+          <th>Group <button (click)='addOrder()'><span class="glyphicon glyphicon-sort-by-alphabet-alt"></span></button></th>
           <th>Owner </th>
           <th>Received at</th>
           <th class="text-center">Action</th>
@@ -16,5 +18,10 @@
         <td class="text-center"><a class='btn btn-info btn-xs' (click)="accept(username, request.GroupName, request.Id)"><span class="glyphicon glyphicon-edit"></span> Accept</a> <a (click)="decline(username, request.Id)" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Decline</a></td>
       </tr>
     </table>
+    <div class="row">
+      <button class="btn btn-danger col-md-offset-5" (click)='previous()'>Prev</button>
+      <button class="btn btn-danger" (click)='next()'>Next</button>
+    </div>
+    <br/>
   </div>
 </div>

@@ -41,7 +41,16 @@ namespace SecretSanta.Services
                     .Skip(skip)
                     .Take(take)
                     .ToList();
-            }    
+            }
+        }
+
+        public bool AlreadyHasRequest(string userId, string groupName)
+        {
+            var foundCount = this._repository
+                .All
+                .Count(r => r.To.Id == userId && r.Group.Name == groupName);
+
+            return foundCount > 0;
         }
 
         public void DeleteRequest(Request request)

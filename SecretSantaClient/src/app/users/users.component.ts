@@ -68,5 +68,4 @@ export class UsersComponent implements OnInit {
         this.toastr.error(error.statusText, 'Error');
       });
   }
-
 }

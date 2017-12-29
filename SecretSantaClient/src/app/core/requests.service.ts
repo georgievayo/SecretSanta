@@ -20,7 +20,10 @@ deleteRequest(username, requestId) {
 
 acceptRequest(username, groupName) {
     const options = this.getHeaders();
-    return this.http.post(`http://localhost:2835/api/groups/${groupName}/participants`, JSON.stringify(username), options)
+    const user = {
+        username: username
+    };
+    return this.http.post(`http://localhost:2835/api/groups/${groupName}/participants`, user, options)
         .map(res => res.json());
 }
 
