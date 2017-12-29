@@ -1,5 +1,7 @@
+import { Router } from '@angular/router';
 import { UsersService } from './../core/users.service';
 import { Component, OnInit } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-signup',
@@ -8,7 +10,9 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SignupComponent implements OnInit {
 
-  constructor(private usersService: UsersService) { }
+  constructor(private usersService: UsersService,
+    private toastr: ToastrService,
+    private router: Router) { }
 
   ngOnInit() {
   }
@@ -24,8 +28,14 @@ export class SignupComponent implements OnInit {
       phoneNumber: phoneNumber,
       interests: interests
     };
-    console.log(user);
-    this.usersService.signup(user);
+
+    this.usersService.signup(user)
+      .subscribe(res => {
+        this.toastr.success('Successful sign up!', 'Success');
+        this.router.navigateByUrl('/');
+      },
+        error => this.toastr.error(error.json().Message, 'Error',
+        { tapToDismiss: true, timeOut: 1000, positionClass: 'toast-top-right'}));
   }
 
 }

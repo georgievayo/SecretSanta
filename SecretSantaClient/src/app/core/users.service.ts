@@ -9,32 +9,21 @@ export class UsersService {
     constructor(private http: Http, private router: Router) { }
 
     signup(user) {
-        this.http.post('http://localhost:2835/api/users', user).subscribe(res => console.log(res));
+        return this.http.post('http://localhost:2835/api/users', user);
     }
 
     login(username: string, password: string) {
-        // should be passHash
-        const headers = new Headers({ 'Access-Control-Allow-Origin': '*' });
-        const options = new RequestOptions({ headers: headers });
-        const body = new URLSearchParams();
-        body.set('username', username);
-        body.set('password', password);
-        body.set('grant_type', 'password');
+        const user = {
+            username: username,
+            password: password
+        };
 
-        return this.http.post('http://localhost:2835/Token', body.toString())
-            .subscribe((res) => {
-                if (res.ok) {
-                    const authToken = res.json();
-                    localStorage.setItem('currentUser', JSON.stringify(authToken));
-                    this.router.navigateByUrl('/home');
-                }
-                // TODO else show toastr message
-            });
+        return this.http.post('http://localhost:2835/api/login', user);
     }
 
     logout() {
-        const user = JSON.parse(localStorage.getItem('currentUser'));
-        localStorage.removeItem('currentUser');
+        const options = this.getHeaders();
+        return this.http.delete(`http://localhost:2835/api/login`, options);
     }
 
     getUsers(skip, take, order, pattern) {
