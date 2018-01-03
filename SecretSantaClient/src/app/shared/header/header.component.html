@@ -1,0 +1,32 @@
+<div class="container">
+  <div class="navbar">
+    <a class="link" routerLink="/home" routerLinkActive="active">
+      <span class="active"><span class="valign"><span class="vertical">Home</span></span></span>
+      <span class="hover"><span class="valign"><span class="vertical">HOME</span></span></span>
+    </a>
+    <a class="link" routerLink="/users" routerLinkActive="active" *ngIf="hasLoggedUser">
+      <span class="active"><span class="valign"><span class="vertical">Users</span></span></span>
+      <span class="hover"><span class="valign"><span class="vertical">USERS</span></span></span>
+    </a>
+    <a class="link" [routerLink]="[ 'users', username, 'requests' ]" *ngIf="hasLoggedUser">
+      <span class="active"><span class="valign"><span class="vertical">Requests</span></span></span>
+      <span class="hover"><span class="valign"><span class="vertical">REQUESTS</span></span></span>
+    </a>
+    <a class="link" [routerLink]="signup" routerLinkActive="active" *ngIf="!hasLoggedUser">
+      <span class="active"><span class="valign"><span class="vertical">Login</span></span></span>
+      <span class="hover"><span class="valign"><span class="vertical">LOGIN</span></span></span>
+    </a>
+    <a class="link" routerLinkActive="active" [routerLink]="signup" *ngIf="!hasLoggedUser">
+      <span class="active"><span class="valign"><span class="vertical">Sign up</span></span></span>
+      <span class="hover"><span class="valign"><span class="vertical">SIGNUP</span></span></span>
+    </a>
+    <a class="link" [routerLink]="[ 'users', username ]" *ngIf="hasLoggedUser">
+      <span class="active"><span class="valign"><span class="vertical">Profile</span></span></span>
+      <span class="hover"><span class="valign"><span class="vertical">PROFILE</span></span></span>
+    </a>
+    <a class="link" *ngIf="hasLoggedUser" (click)="logout()">
+      <span class="active"><span class="valign"><span class="vertical">Logout</span></span></span>
+      <span class="hover"><span class="valign"><span class="vertical">LOGOUT</span></span></span>
+    </a>
+  </div>
+</div>

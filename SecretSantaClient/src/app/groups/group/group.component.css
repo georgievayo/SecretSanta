@@ -1,0 +1,14 @@
+#group {
+    background-color: rgba(225, 225, 225, 0.5);
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+small {
+    color: white;
+}
+
+a {
+    color: white;
+    cursor: pointer;
+}

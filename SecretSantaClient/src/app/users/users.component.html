@@ -1,0 +1,29 @@
+<div class="container col-md-8 col-md-offset-5" id="users-search">
+  <div class="row">
+    <h2>Search Users</h2>
+    <div class="input-group">
+      <input type="search" class="form-control" name="search" placeholder="Search" #searchInput>
+      <div class="input-group-btn">
+        <input type="button" id="searchbtn" (click)="search(searchInput.value)" value="Go">
+      </div>
+    </div>
+    <div>
+      <div id="options"> <strong>Order: </strong>
+        <input type="radio" (click)="addOrder('asc')" checked="checked" value="ascending" name="order" id="ascending">
+        <label for="name">Ascending</label>
+        <input type="radio" (click)="addOrder('desc')" value="descending" name="order" id="descending">
+        <label for="details">Descending</label>
+      </div>
+
+    </div>
+    <div class="row">
+    <div class="searchable-container">
+      <app-user-short *ngFor="let user of users" [user]="user"></app-user-short>
+    </div>
+    </div>
+    <div class="row">
+      <button class="btn btn-danger col-md-offset-5" *ngIf='shownButtons' (click)='previous(searchInput.value)'>Prev</button>
+      <button class="btn btn-danger" *ngIf='shownButtons' (click)='next(searchInput.value)'>Next</button>
+    </div>
+    <br/>
+  </div>

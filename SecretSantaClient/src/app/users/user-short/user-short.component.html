@@ -1,0 +1,11 @@
+<div class="items col-xs-12 col-sm-12 col-md-6 col-lg-6 clearfix">
+  <div class="info-block block-info clearfix">
+       <div class="square-box pull-left">
+           <span class="glyphicon glyphicon-user glyphicon-lg"></span>
+       </div>
+       <h4>Name: <a [routerLink]="user.UserName">{{user?.DisplayName}}</a></h4>
+       <p>Username: {{user?.Username}}</p>
+       <p><span>Phone: {{user?.PhoneNumber}}</span></p>
+       <p><span>Email: {{user?.Email}}</span></p>
+   </div>
+</div>

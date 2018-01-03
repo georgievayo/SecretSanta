@@ -1,0 +1,31 @@
+<div id="inviteModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Choose name of group</h4>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <div class="row col-md-12 custyle">
+          <table class="table table-striped custab">
+          <thead>
+              <tr>
+                  <th>Group</th>
+                  <th class="text-center">Action</th>
+              </tr>
+          </thead>
+                  <tr *ngFor="let group of groups">
+                      <td>{{group.GroupName}}</td>
+                      <td class="text-center"><a class='btn btn-info btn-xs' (click)="invite(group.GroupName)"><span class="glyphicon glyphicon-share"></span> Invite</a></td>
+                  </tr>
+          </table>
+          </div>
+      </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
