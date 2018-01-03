@@ -46,7 +46,8 @@ namespace SecretSanta.Services
         {
             var userSessions = this._repository
                 .All
-                .Where(session => session.ExpirationDateTime < DateTime.Now);
+                .Where(session => session.ExpirationDateTime < DateTime.Now)
+                .ToList();
 
             foreach (var session in userSessions)
             {

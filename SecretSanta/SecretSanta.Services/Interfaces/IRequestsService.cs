@@ -7,6 +7,8 @@ namespace SecretSanta.Services.Interfaces
     {
         ICollection<Request> GetUserRequests(string userId, string order, int skip, int take);
 
+        bool AlreadyHasRequest(string userId, string groupName);
+
         void DeleteRequest(Request request);
     }
 }

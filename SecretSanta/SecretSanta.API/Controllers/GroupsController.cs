@@ -47,7 +47,11 @@ namespace SecretSanta.API.Controllers
 
             if (group.OwnerId == this._currentUserId)
             {
-                var model = new GroupViewModel(group.Name, group.Owner.DisplayName, group.Users);
+                var participants = group.Users
+                    .Select(u => new UserShortViewModel(u.UserName, u.DisplayName, u.PhoneNumber, u.Email))
+                    .ToList();
+
+                var model = new GroupViewModel(group.Name, group.Owner.DisplayName, participants);
                 return Ok(model);
             }
             else
@@ -184,7 +188,7 @@ namespace SecretSanta.API.Controllers
             }
 
             var participants = this._groupsService.GetParticipantsOfGroup(groupName);
-            if (participants.Count == 1)
+            if (participants.Count == 1 || group.IsProcessStarted)
             {
                 return Content(HttpStatusCode.PreconditionFailed, "The process of connection cannot be started!");
             }
@@ -196,6 +200,8 @@ namespace SecretSanta.API.Controllers
                 this._connectionsService.AddConnection(participants.ElementAt(pair.Key),
                     participants.ElementAt(pair.Value), group);
             }
+
+            this._groupsService.SetThatProcessIsStarted(group);
 
             return Content(HttpStatusCode.Created, "The process of connection was started!");
         }

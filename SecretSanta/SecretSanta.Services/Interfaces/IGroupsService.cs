@@ -7,6 +7,8 @@ namespace SecretSanta.Services.Interfaces
     {
         Group CreateGroup(string name, User owner);
 
+        void SetThatProcessIsStarted(Group group);
+
         void AddUserToGroup(string groupName, User user);
 
         void RemoveUserFromGroup(Group group, User user);

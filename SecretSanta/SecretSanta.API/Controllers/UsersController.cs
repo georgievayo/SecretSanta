@@ -172,7 +172,6 @@ namespace SecretSanta.API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         [Route("{username}/requests")]
         public IHttpActionResult GetAllRequests([FromUri] string username, [FromUri] ViewCriteria criteria)
         {
@@ -215,13 +214,13 @@ namespace SecretSanta.API.Controllers
                 return NotFound();
             }
 
-            if (this._currentUserUsername != request.OwnerName)
+            if (this._currentUserUsername != group.Owner.UserName)
             {
                 return Content(HttpStatusCode.Forbidden, "You cannot send requests for this group.");
             }
 
-            var foundRequst = user.Requests.First(r => r.ReceivedAt == request.Date && r.Group.Name == request.GroupName);
-            if (foundRequst != null)
+            var hasRequest = this._requestsService.AlreadyHasRequest(user.Id, request.GroupName);
+            if (hasRequest)
             {
                 return Content(HttpStatusCode.Conflict, "You have already sent request to this user.");
             }
@@ -235,7 +234,7 @@ namespace SecretSanta.API.Controllers
             };
 
             this._usersService.AddRequest(requestToSend, user);
-            var result = new RequestViewModel(requestToSend.Id, requestToSend.Group.Name, requestToSend.To.UserName,
+            var result = new RequestViewModel(requestToSend.Id, requestToSend.Group.Name, group.Owner.UserName,
                 requestToSend.ReceivedAt);
 
             return Content(HttpStatusCode.Created, result);

@@ -11,7 +11,7 @@ namespace SecretSanta.API.Models
             OwnerName = ownerName;
         }
 
-        public GroupViewModel(string groupName, string ownerName, ICollection<User> participants)
+        public GroupViewModel(string groupName, string ownerName, ICollection<UserShortViewModel> participants)
             :this(groupName, ownerName)
         {
             Participants = participants;
@@ -21,6 +21,6 @@ namespace SecretSanta.API.Models
 
         public string OwnerName { get; set; }
 
-        public ICollection<User> Participants { get; set; }
+        public ICollection<UserShortViewModel> Participants { get; set; }
     }
 }

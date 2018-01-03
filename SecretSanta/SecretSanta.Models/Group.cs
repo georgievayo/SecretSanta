@@ -18,6 +18,8 @@ namespace SecretSanta.Models
         [Index(IsUnique = true)]
         public string Name { get; set; }
 
+        public bool IsProcessStarted { get; set; }
+
         public string OwnerId { get; set; }
 
         public virtual User Owner { get; set; }
