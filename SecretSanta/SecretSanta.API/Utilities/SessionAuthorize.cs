@@ -10,18 +10,16 @@ using System.Web.Http.Filters;
 using Autofac.Integration.WebApi;
 using SecretSanta.API.Controllers;
 
-namespace SecretSanta.API
+namespace SecretSanta.API.Utilities
 {
     public class SessionAuthorizeAttribute : ActionFilterAttribute, IAutofacActionFilter
     {
         private readonly IAccountsService _accountsService;
 
-
         public SessionAuthorizeAttribute(IAccountsService accountsService)
         {
             this._accountsService = accountsService;
         }
-
 
         public override async Task OnActionExecutingAsync(HttpActionContext actionContext,
             CancellationToken cancellationToken)
@@ -43,11 +41,13 @@ namespace SecretSanta.API
 
             if (actionContext.ControllerContext.Controller.GetType() == typeof(GroupsController))
             {
-                ((GroupsController)actionContext.ControllerContext.Controller).SetCurrentUserId(userSession.UserId);
+                ((GroupsController)actionContext.ControllerContext.Controller)
+                    .SetCurrentUserId(userSession.UserId);
             }
             else
             {
-                ((UsersController)actionContext.ControllerContext.Controller).SetCurrentUser(userSession.UserId, userSession.User.UserName);
+                ((UsersController)actionContext.ControllerContext.Controller)
+                    .SetCurrentUser(userSession.UserId, userSession.User.UserName);
             }
 
             await base.OnActionExecutingAsync(actionContext, cancellationToken);
