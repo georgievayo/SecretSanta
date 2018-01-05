@@ -11,5 +11,7 @@ namespace SecretSanta.Services.Interfaces
         Connection AddConnection(User from, User to, Group group);
 
         Connection GetUserConnection(string username, string groupName);
+
+        void SaveConnections(ICollection<User> participants, Group group);
     }
 }

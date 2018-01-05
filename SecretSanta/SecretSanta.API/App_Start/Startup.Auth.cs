@@ -9,11 +9,11 @@ namespace SecretSanta.API
 {
     public partial class Startup
     {
+        private const string PublicClientId = "self";
+
         public const string TokenEndpointPath = "/api/token";
 
         public static OAuthAuthorizationServerOptions OAuthOptions { get; private set; }
-
-        public static string PublicClientId { get; private set; }
 
         public void ConfigureAuth(IAppBuilder app)
         {
@@ -22,7 +22,6 @@ namespace SecretSanta.API
             app.CreatePerOwinContext<ApplicationUserManager>(ApplicationUserManager.Create);
 
             // Configure the application for OAuth based flow
-            PublicClientId = "self";
             OAuthOptions = new OAuthAuthorizationServerOptions
             {
                 TokenEndpointPath = new PathString(TokenEndpointPath),

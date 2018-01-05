@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SecretSanta.Models;
+﻿using SecretSanta.Models;
 
 namespace SecretSanta.Services.Interfaces
 {
@@ -11,7 +6,7 @@ namespace SecretSanta.Services.Interfaces
     {
         void CreateUserSession(string username, string authToken);
 
-        void InvalidateUserSession();
+        bool InvalidateUserSession();
 
         UserSession ReValidateSession(string authToken);
 

@@ -5,6 +5,7 @@ using Autofac.Integration.WebApi;
 using Microsoft.Owin;
 using Owin;
 using SecretSanta.API.Controllers;
+using SecretSanta.API.Utilities;
 using SecretSanta.Data;
 using SecretSanta.Data.Interfaces;
 using SecretSanta.Services;

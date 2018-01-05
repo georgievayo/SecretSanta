@@ -51,5 +51,40 @@ namespace SecretSanta.Services
                 .Include(c => c.To)
                 .FirstOrDefault(c => c.From.UserName == username && c.Group.Name == groupName);
         }
+
+        public void SaveConnections(ICollection<User> participants, Group group)
+        {
+            var connections = this.GenerateConnections(participants);
+
+            foreach (var pair in connections)
+            {
+                this.AddConnection(participants.ElementAt(pair.Key),
+                    participants.ElementAt(pair.Value), group);
+            }
+        }
+
+        private IDictionary<int, int> GenerateConnections(ICollection<User> participants)
+        {
+            var count = participants.Count;
+
+            Dictionary<int, int> pairs = new Dictionary<int, int>();
+            bool[] used = new bool[count];
+
+            var rand = new Random();
+
+            for (int i = 0; i < count; i++)
+            {
+                var connectToIndex = rand.Next(0, count);
+                while (connectToIndex == i || used[connectToIndex])
+                {
+                    connectToIndex = rand.Next(0, count);
+                }
+
+                pairs[i] = connectToIndex;
+                used[connectToIndex] = true;
+            }
+
+            return pairs;
+        }
     }
 }

@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using SecretSanta.API.Models;
-using SecretSanta.Models;
 using SecretSanta.Services.Interfaces;
 
 namespace SecretSanta.API.Controllers
@@ -16,16 +14,19 @@ namespace SecretSanta.API.Controllers
     public class GroupsController : ApiController
     {
         private readonly IGroupsService _groupsService;
+        private readonly IRequestsService _requestsService;
         private readonly IUsersService _usersService;
         private readonly IConnectionsService _connectionsService;
         private string _currentUserId;
 
-        public GroupsController(IGroupsService groupsService, 
-            IUsersService usersService, 
+        public GroupsController(IGroupsService groupsService,
+            IUsersService usersService,
+            IRequestsService requestsService,
             IConnectionsService connectionsService)
         {
             this._groupsService = groupsService;
             this._usersService = usersService;
+            this._requestsService = requestsService;
             this._connectionsService = connectionsService;
         }
 
@@ -38,47 +39,38 @@ namespace SecretSanta.API.Controllers
         [Route("{groupName}")]
         public IHttpActionResult GetGroup([FromUri] string groupName)
         {
-            if (groupName == null)
+            if (string.IsNullOrEmpty(groupName))
             {
                 return BadRequest();
             }
 
             var group = this._groupsService.GetGroupByName(groupName);
-
+            var model = new GroupViewModel(group.Name, group.Owner.DisplayName);
             if (group.OwnerId == this._currentUserId)
             {
                 var participants = group.Users
                     .Select(u => new UserShortViewModel(u.UserName, u.DisplayName, u.PhoneNumber, u.Email))
                     .ToList();
+                model.Participants = participants;
+            }
 
-                var model = new GroupViewModel(group.Name, group.Owner.DisplayName, participants);
-                return Ok(model);
-            }
-            else
-            {
-                var model = new GroupViewModel(group.Name, group.Owner.DisplayName);
-                return Ok(model);
-            }
+            return Ok(model);
         }
 
         [HttpPost]
         [Route("")]
         public IHttpActionResult CreateGroup([FromBody] CreateGroupViewModel groupModel)
         {
+            if (groupModel == null || !ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var currentUser = this._usersService.GetUserById(this._currentUserId);
+
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var currentUser = this._usersService.GetUserById(this._currentUserId);
                 var group = this._groupsService.CreateGroup(groupModel.Name, currentUser);
-
-                if (group == null)
-                {
-                    return BadRequest();
-                }
 
                 var model = new GroupViewModel(group.Name, group.Owner.DisplayName);
 
@@ -89,7 +81,7 @@ namespace SecretSanta.API.Controllers
                 return Content(HttpStatusCode.Conflict, "The name should be unique!");
             }
         }
-        
+
         [HttpGet]
         [Route("{groupName}/participants")]
         public IHttpActionResult GetParticipants(string groupName)
@@ -130,6 +122,12 @@ namespace SecretSanta.API.Controllers
             if (user == null)
             {
                 return NotFound();
+            }
+
+            var hasRequest = this._requestsService.AlreadyHasRequest(user.Id, groupName);
+            if (!hasRequest)
+            {
+                return Content(HttpStatusCode.Forbidden, "You do not have request for this group.");
             }
 
             this._groupsService.AddUserToGroup(groupName, user);
@@ -193,41 +191,10 @@ namespace SecretSanta.API.Controllers
                 return Content(HttpStatusCode.PreconditionFailed, "The process of connection cannot be started!");
             }
 
-            var connections = this.GenerateConnections(participants);
-
-            foreach (var pair in connections)
-            {
-                this._connectionsService.AddConnection(participants.ElementAt(pair.Key),
-                    participants.ElementAt(pair.Value), group);
-            }
-
+            this._connectionsService.SaveConnections(participants, group);
             this._groupsService.SetThatProcessIsStarted(group);
 
             return Content(HttpStatusCode.Created, "The process of connection was started!");
-        }
-
-        private IDictionary<int, int> GenerateConnections(ICollection<User> participants)
-        {
-            var count = participants.Count;
-
-            Dictionary<int, int> pairs = new Dictionary<int, int>();
-            bool[] used = new bool[count];
-
-            var rand = new Random();
-
-            for (int i = 0; i < count; i++)
-            {
-                var connectToIndex = rand.Next(0, count);
-                while (connectToIndex == i || used[connectToIndex])
-                {
-                    connectToIndex = rand.Next(0, count);
-                }
-
-                pairs[i] = connectToIndex;
-                used[connectToIndex] = true;
-            }
-
-            return pairs;
         }
     }
 }

@@ -59,7 +59,7 @@ namespace SecretSanta.API.Controllers
         [Route("")]
         public async Task<IHttpActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (model == null || !ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }

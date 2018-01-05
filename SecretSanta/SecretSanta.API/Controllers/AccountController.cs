@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNet.Identity;
+﻿using System;
+using Microsoft.AspNet.Identity;
 using Microsoft.Owin.Testing;
 using SecretSanta.API.Models;
 using SecretSanta.Services.Interfaces;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -28,9 +28,9 @@ namespace SecretSanta.API.Controllers
         [AllowAnonymous]
         public async Task<IHttpActionResult> Login(LoginViewModel model)
         {
-            if (model == null)
+            if (model == null || !ModelState.IsValid)
             {
-                return this.BadRequest("Invalid user data");
+                return this.BadRequest("Username or password is not correct.");
             }
 
             var testServer = TestServer.Create<Startup>();
@@ -41,10 +41,11 @@ namespace SecretSanta.API.Controllers
                 new KeyValuePair<string, string>("password", model.Password)
             };
             var requestParamsFormUrlEncoded = new FormUrlEncodedContent(requestParams);
+
             var tokenServiceResponse = await testServer.HttpClient.PostAsync(
                 Startup.TokenEndpointPath, requestParamsFormUrlEncoded);
 
-            if (tokenServiceResponse.StatusCode == HttpStatusCode.OK)
+            if (tokenServiceResponse.IsSuccessStatusCode)
             {
                 var responseString = await tokenServiceResponse.Content.ReadAsStringAsync();
                 var jsSerializer = new JavaScriptSerializer();
@@ -53,10 +54,22 @@ namespace SecretSanta.API.Controllers
                 var authToken = responseData["access_token"];
                 var username = responseData["userName"];
 
-                this._accountsService.CreateUserSession(username, authToken);
+                try
+                {
+                    this._accountsService.CreateUserSession(username, authToken);
+                }
+                catch (Exception)
+                {
+                    return NotFound();
+                }
 
                 this._accountsService.DeleteExpiredSessions();
             }
+            else
+            {
+                return NotFound();
+            }
+
 
             return this.ResponseMessage(tokenServiceResponse);
         }
@@ -66,7 +79,19 @@ namespace SecretSanta.API.Controllers
         public IHttpActionResult Logout()
         {
             Request.GetOwinContext().Authentication.SignOut(DefaultAuthenticationTypes.ExternalBearer);
-            this._accountsService.InvalidateUserSession();
+
+            try
+            {
+                var isInvalidated = this._accountsService.InvalidateUserSession();
+                if (!isInvalidated)
+                {
+                    return this.NotFound();
+                }
+            }
+            catch (ArgumentNullException)
+            {
+                return this.BadRequest();
+            }
 
             return this.Ok();
         }

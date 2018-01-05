@@ -24,12 +24,14 @@ namespace SecretSanta.Services
         public void CreateUserSession(string username, string authToken)
         {
             var user = this._usersService.GetUserByUsername(username);
+
             if(user == null)
             {
-                throw new ArgumentNullException();
+                throw new Exception();
             }
 
             var userId = user.Id;
+
             var userSession = new UserSession()
             {
                 Id = Guid.NewGuid(),
@@ -46,8 +48,7 @@ namespace SecretSanta.Services
         {
             var userSessions = this._repository
                 .All
-                .Where(session => session.ExpirationDateTime < DateTime.Now)
-                .ToList();
+                .Where(session => session.ExpirationDateTime < DateTime.Now);
 
             foreach (var session in userSessions)
             {
@@ -73,9 +74,15 @@ namespace SecretSanta.Services
             return userSession;
         }
 
-        public void InvalidateUserSession()
+        public bool InvalidateUserSession()
         {
             string authToken = GetCurrentBearerAuthrorizationToken();
+
+            if (authToken == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             var userSession = this._repository
                 .All
                 .FirstOrDefault(session =>
@@ -85,7 +92,11 @@ namespace SecretSanta.Services
             {
                 this._repository.Delete(userSession);
                 this._unitOfWork.SaveChanges();
+
+                return true;
             }
+
+            return false;
         }
 
         private HttpRequestMessage CurrentRequest
@@ -99,13 +110,11 @@ namespace SecretSanta.Services
         private string GetCurrentBearerAuthrorizationToken()
         {
             string authToken = null;
-            if (CurrentRequest.Headers.Authorization != null)
+            if (CurrentRequest.Headers.Authorization != null && CurrentRequest.Headers.Authorization.Scheme == "Bearer")
             {
-                if (CurrentRequest.Headers.Authorization.Scheme == "Bearer")
-                {
-                    authToken = CurrentRequest.Headers.Authorization.Parameter;
-                }
+                authToken = CurrentRequest.Headers.Authorization.Parameter;
             }
+
             return authToken;
         }
     }
