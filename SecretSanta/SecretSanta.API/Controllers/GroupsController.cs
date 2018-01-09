@@ -71,8 +71,11 @@ namespace SecretSanta.API.Controllers
             try
             {
                 var group = this._groupsService.CreateGroup(groupModel.Name, currentUser);
+                var participants = group.Users.Select(
+                    u => new UserShortViewModel(u.UserName, u.DisplayName, u.PhoneNumber, u.Email))
+                    .ToList();
 
-                var model = new GroupViewModel(group.Name, group.Owner.DisplayName);
+                var model = new GroupViewModel(group.Name, group.Owner.DisplayName, participants);
 
                 return Content(HttpStatusCode.Created, model);
             }

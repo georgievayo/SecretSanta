@@ -4,6 +4,7 @@ using Microsoft.Owin.Testing;
 using SecretSanta.API.Models;
 using SecretSanta.Services.Interfaces;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -93,7 +94,7 @@ namespace SecretSanta.API.Controllers
                 return this.BadRequest();
             }
 
-            return this.Ok();
+            return this.Content(HttpStatusCode.NoContent, "Deleted");
         }
     }
 }
