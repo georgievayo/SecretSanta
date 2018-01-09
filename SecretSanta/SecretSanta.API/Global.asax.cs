@@ -1,4 +1,5 @@
 ﻿using System.Web.Http;
+using System.Web.Mvc;
 
 namespace SecretSanta.API
 {
@@ -7,6 +8,7 @@ namespace SecretSanta.API
         protected void Application_Start()
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
+            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
         }
     }
 }
