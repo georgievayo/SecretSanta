@@ -53,8 +53,9 @@ namespace SecretSanta.Services
             foreach (var session in userSessions)
             {
                 this._repository.Delete(session);
-                this._unitOfWork.SaveChanges();
             }
+
+            this._unitOfWork.SaveChanges();
         }
 
         public UserSession ReValidateSession(string authToken)
