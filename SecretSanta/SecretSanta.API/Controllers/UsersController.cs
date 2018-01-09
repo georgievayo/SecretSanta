@@ -260,7 +260,7 @@ namespace SecretSanta.API.Controllers
                 return Content(HttpStatusCode.Forbidden, "You can delete only your requests.");
             }
 
-            var request = user.Requests.First(r => r.Id == Guid.Parse(id));
+            var request = user.Requests.FirstOrDefault(r => r.Id == Guid.Parse(id));
             if (request == null)
             {
                 return NotFound();

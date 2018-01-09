@@ -164,6 +164,12 @@ namespace SecretSanta.API.Controllers
                 return Content(HttpStatusCode.Forbidden, "Only the owner of group can remove participants!");
             }
 
+            if (group.IsProcessStarted)
+            {
+                return Content(HttpStatusCode.Forbidden,
+                    "You cannot remove user because the process of connections is already started!");
+            }
+
             this._groupsService.RemoveUserFromGroup(group, user);
             return Content(HttpStatusCode.NoContent, "Deleted");
         }

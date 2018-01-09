@@ -23,6 +23,7 @@ namespace SecretSanta.Services
         {
             return this._repository
                 .All
+                .Include(u => u.Requests)
                 .FirstOrDefault(u => u.UserName == username);
         }
 
